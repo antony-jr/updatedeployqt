@@ -21,13 +21,32 @@ static void qmake_query_result_destroy(qmake_query_result_t **p)
 		if((*p)->value){
 			free((*p)->value);
 		}
-		to_free = *p;
-		*p = (*p)->next;
+		/*
+		 * using p = &((to_free = *p)->next);
+		 * throws some context errors in valgrind , don't 
+		 * know what I'm doing wrong.
+		*/
+		*p = (to_free = *p)->next;
 		free(to_free);
 	}
 }
 
+static short check_prog(const char *prog){
+	FILE *fp = NULL;
+#ifdef __linux__
+	if(!(fp = popen(prog , "r"))){
+#else
+	if(1){
+#endif
+		return -1; 
+	}
+	fclose(fp);
+	return 0;
+}
+
 qmake_process_t *qmake_process_create(const char *prog){
+	if(!prog || check_prog(prog))
+		return NULL;
 	size_t len = strlen(prog);
 	qmake_process_t *qp = calloc(1 , sizeof(qmake_process_t));
 	if(!qp)
@@ -103,7 +122,7 @@ qmake_query_result_t *qmake_process_query(qmake_process_t *qp , const char *qry)
 				(*p)->next = qr;
 				break;
 			}
-			p = &(*p)->next;
+			p = &((*p)->next);
 		}
 	}
 	fclose(fp);
