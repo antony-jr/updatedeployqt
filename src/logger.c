@@ -24,4 +24,5 @@ int printl(log_class_t class, const char *fmt , ...){
 	vprintf(fmt , ap);
 	putchar('\n');
 	va_end(ap);
+	return 0;
 }

@@ -3,6 +3,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
+
+static char *strlower(char *buf , const char *s){
+	while(*s){
+		*buf++ = tolower(*s++);
+	}
+	*buf = '\0';
+	return buf;
+}
 
 static qmake_query_result_t *qmake_query_result_create(char *value)
 {
@@ -47,8 +56,10 @@ static short check_prog(const char *prog){
 		return -1;
 	}
 	fread(buf , (sizeof buf) - 1 , sizeof *buf , fp);
+	buf[(sizeof buf) - 1] = '\0';
+	strlower(buf , buf);
 	if(strstr(buf , "command not found") ||
-	   !strstr(buf , "qmake")){
+	   !strstr(buf ,  "qmake")){
 		pclose(fp);
 		return -1;
 	}
