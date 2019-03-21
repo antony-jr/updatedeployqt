@@ -1,4 +1,5 @@
 #include <qmake_process.h>
+#include <logger.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -33,6 +34,7 @@ static void qmake_query_result_destroy(qmake_query_result_t **p)
 
 static short check_prog(const char *prog){
 	FILE *fp = NULL;
+	char buf[50];
 #ifdef __linux__
 	if(!(fp = popen(prog , "r"))){
 #else
@@ -40,7 +42,18 @@ static short check_prog(const char *prog){
 #endif
 		return -1; 
 	}
-	fclose(fp);
+	if(feof(fp)){
+		pclose(fp);
+		return -1;
+	}
+	fread(buf , (sizeof buf) - 1 , sizeof *buf , fp);
+	if(strstr(buf , "command not found") ||
+	   !strstr(buf , "qmake")){
+		pclose(fp);
+		return -1;
+	}
+
+	pclose(fp);
 	return 0;
 }
 
@@ -125,7 +138,7 @@ qmake_query_result_t *qmake_process_query(qmake_process_t *qp , const char *qry)
 			p = &((*p)->next);
 		}
 	}
-	fclose(fp);
+	pclose(fp);
 	return qr;
 }
 
