@@ -14,5 +14,11 @@ set(CMAKE_C_FLAGS_RELEASE "-O3")
 include_directories(.)
 include_directories(include)
 
-add_executable(updatedeployqt src/qmake_process.c src/logger.c src/main.c include/logger.h include/qmake_process.h)
+add_executable(updatedeployqt src/qmake_process.c
+			      src/appdir_context.c
+			      src/logger.c 
+			      src/main.c 
+			      include/logger.h 
+			      include/qmake_process.h
+			      include/appdir_context.h)
 target_include_directories(updatedeployqt PUBLIC . include)
