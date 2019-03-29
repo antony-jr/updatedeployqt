@@ -123,7 +123,7 @@ qmake_query_result_t *qmake_process_query(qmake_process_t *qp , const char *qry)
 	while(!feof(fp)){
 		c = getc(fp);
 		*(output + pos) = c;
-		output_guard = realloc(output ,  pos + 2);
+		output_guard = realloc(output ,  sizeof(*output) * (pos + 2));
 		if(!output_guard){
 			free(output);
 			return NULL;
@@ -137,18 +137,11 @@ qmake_query_result_t *qmake_process_query(qmake_process_t *qp , const char *qry)
 		return NULL;
 	}	
 
-	if(!qp->results_head){
-		qp->results_head = qr;
-	}else{
-		p = &qp->results_head;
-		while(*p){
-			if(!(*p)->next){
-				(*p)->next = qr;
-				break;
-			}
-			p = &((*p)->next);
-		}
+	p = &qp->results_head;
+	while(*p){
+		p = &((*p)->next);
 	}
+	*p = qr;
 	pclose(fp);
 	return qr;
 }
