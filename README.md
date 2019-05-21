@@ -90,14 +90,12 @@ We are repacking **qTox** AppImage along with our Auto updater.
    $ ./updatedeployqt-continuous-x86_64.AppImage AppImage \
                                                  squashfs-root/local/plugins/platforms/libqxcb.so \
                                                  -qv "5.7.0"
-   $ wget \ 
-     "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
+   $ wget "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
    $ chmod +x appimagetool-x86_64.AppImage
    $ # qTox does not provide any update info , so for demo we created a kind of proxy for that.
-   $ ./appimagetool-x86 -u "" \
+   $ ./appimagetool-x86 -u "gh-releases-zsync|antony-jr|qTox|continuous|qtox-x86_64.AppImage.zsync" \
                         --no-appstream squashfs-root
-   $ # Now you should have qTox-x86_64.AppImage ? Something like that.
-   $ ./qTox-x86_64.AppImage # The update should start in a second. 
+   $ ./qtox-x86_64.AppImage # The update should start in a second. 
 ```
 
 
