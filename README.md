@@ -46,7 +46,7 @@ For now this only covers the usage for deploying auto updater for AppImages.
 
 ### AppImages
 
-First step is to bundle the required shared libraries and qt plugins using [linuxdeployqt]() or [linuxdeploy]() in the **AppDir**.
+First step is to bundle the required shared libraries and qt plugins using [linuxdeployqt](https://github.com/probonopd/linuxdeployqt) or [linuxdeploy](https://github.com/linuxdeploy/linuxdeploy) in the **AppDir**.
 You **SHOULD** not package it as AppImage yet. 
 
 Now execute this command with respect to your **AppDir**. You have to find the qxcb plugin typically located in your **AppDir** at
@@ -58,18 +58,36 @@ Now execute this command with respect to your **AppDir**. You have to find the q
 
 **Thats it**.
 
-Now **package it as an AppImage**. You can use [linuxdeployqt]() , [linuxdeploy]() or [appimagetool](). Make sure you have 
+Now **package it as an AppImage**. You can use [linuxdeployqt](https://github.com/probonopd/linuxdeployqt) , [linuxdeploy](https://github.com/linuxdeploy/linuxdeploy) or [appimagetool](). Make sure you have 
 included the **update information** as given in the **AppImage specification** , Without the update information embeded in 
 the AppImage , the update will not work.
 
 **IMPORTANT** : Also you have to make sure that you deploy **libQt5Network.so.5** which should be deployed automatically by
-[linuxdeploy]() in most cases. You can use ```--lib-path``` command argument to check for the network module.
+[linuxdeploy](https://github.com/linuxdeploy/linuxdeploy) in most cases. You can use ```--lib-path``` command argument to check for the network module.
 
- 
+
 **NOTE** : The Qt version number is very important to deploy the correct plugins , the program automatically detects the qt version 
 by querying **qmake** installed in the system. You can however can specify any Qt version using ```--qt-version``` program
 argument.
 
+
+The whole process can follow this template , I highly recommend you use [linuxdeploy](https://github.com/linuxdeploy/linuxdeploy) to do this.
+
+
+```
+    $ wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+    $ wget https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage  
+    $ chmod +x linuxdeploy*.AppImage
+    $ ./linuxdeploy-x86_64.AppImage --appdir=AppDir -d AppDir/YourApp.desktop -p qt
+    $ wget -O updatedeployqt-continuous-x86_64.AppImage "https://git.io/fj4CH"
+    $ chmod +x updatedeployqt-continuous-x86_64.AppImage
+    $ ./updatedeployqt-continuous-x86_64.AppImage AppImage AppDir/usr/plugins/platforms/libqxcb.so
+    $ export UPDATE_INFORMATION="gh-releases-zsync|git_username|git_repo|continuous|YourApp*-x86_64.AppImage.zsync"
+    $ ./linuxdeploy-x86_64.AppImage --appdir=appdir --output appimage
+    $ # Thats it , now you can use YourApp-x86_64.AppImage 
+```
+
+**Here is an [example repo](https://github.com/antony-jr/QTalarm-AppImage) which does this in travis-ci and uploads it to releases.**
 
 #### Repacking AppImages with Auto Update
 
