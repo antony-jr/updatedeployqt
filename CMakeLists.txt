@@ -15,10 +15,15 @@ include_directories(.)
 include_directories(include)
 
 add_executable(updatedeployqt src/qmake_process.c
-			      src/appdir_context.c
-			      src/logger.c 
+			      src/logger.c
+			      src/md5.c 
+			      src/downloader.c
+			      src/config_writer.c
 			      src/main.c 
 			      include/logger.h 
 			      include/qmake_process.h
-			      include/appdir_context.h)
+			      include/md5.h
+			      include/downloader.h
+			      include/config_writer.h)
+target_link_libraries(updatedeployqt PUBLIC curl)
 target_include_directories(updatedeployqt PUBLIC . include)

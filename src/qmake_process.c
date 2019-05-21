@@ -146,7 +146,7 @@ qmake_query_result_t *qmake_process_query(qmake_process_t *qp , const char *qry)
 	return qr;
 }
 
-char *qmake_query_result_value(qmake_query_result_t *qr){
+const char *qmake_query_result_value(qmake_query_result_t *qr){
 	if(!qr)
 		return NULL;
 	return qr->value;
