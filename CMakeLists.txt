@@ -14,6 +14,8 @@ set(CMAKE_C_FLAGS_RELEASE "-O3")
 include_directories(.)
 include_directories(include)
 
+
+add_definitions(-DGIT_COMMIT_STR="${GIT_COMMIT_STR}")
 add_executable(updatedeployqt src/qmake_process.c
 			      src/logger.c
 			      src/md5.c 
@@ -25,6 +27,7 @@ add_executable(updatedeployqt src/qmake_process.c
 			      include/md5.h
 			      include/downloader.h
 			      include/config_writer.h)
+
 target_link_libraries(updatedeployqt PUBLIC curl)
 target_include_directories(updatedeployqt PUBLIC . include)
 

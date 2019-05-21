@@ -9,7 +9,7 @@ before_install:
 script:
   - mkdir build
   - cd build
-  - cmake .. -DCMAKE_INSTALL_PREFIX=/usr
+  - cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DGIT_COMMIT_STR=$(git rev-parse --short HEAD)
   - make -j$(nproc)
   - make install DESTDIR=../appdir
   - cd ..
