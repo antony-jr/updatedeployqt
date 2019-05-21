@@ -16,8 +16,7 @@ executable and you are ready to go. This works in travis-ci and other such servi
 update directly on travis-ci.
 
 ```
- $ wget \
-   "https://github.com/TheFutureShell/updatedeployqt/releases/download/continuous/updatedeployqt-continuous-x86_64.AppImage"
+ $ wget "https://git.io/fj4CH"
  $ chmod +x updatedeployqt-continuous-x86_64.AppImage
  $ ./updatedeployqt-continuous-x86_64.AppImage
 ```
@@ -86,10 +85,11 @@ We are repacking **qTox** AppImage along with our Auto updater.
    $ ./qTox-v1.16.3.x86_64.AppImage --appimage-extract # get the contents
    $ # We know qTox v1.16.3 uses Qt version 5.7.3 or so.
    $ # Download updatedeployqt 
-   $ wget \
-     "https://github.com/TheFutureShell/updatedeployqt/releases/download/continuous/updatedeployqt-continuous-x86_64.AppImage"
+   $ wget "https://git.io/fj4CH"
    $ chmod +x updatedeployqt-continuous-x86_64.AppImage
-   $ ./updatedeployqt-continuous-x86_64.AppImage AppImage squash-root/local/plugins/platforms/libqxcb.so -qv "5.7.0"
+   $ ./updatedeployqt-continuous-x86_64.AppImage AppImage \
+                                                 squashfs-root/local/plugins/platforms/libqxcb.so \
+                                                 -qv "5.7.0"
    $ wget \ 
      "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
    $ chmod +x appimagetool-x86_64.AppImage
