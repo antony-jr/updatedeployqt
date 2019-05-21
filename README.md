@@ -58,7 +58,7 @@ Now execute this command with respect to your **AppDir**. You have to find the q
 
 **Thats it**.
 
-Now **package it as an AppImage**. You can use [linuxdeployqt](https://github.com/probonopd/linuxdeployqt) , [linuxdeploy](https://github.com/linuxdeploy/linuxdeploy) or [appimagetool](). Make sure you have 
+Now **package it as an AppImage**. You can use [linuxdeployqt](https://github.com/probonopd/linuxdeployqt) , [linuxdeploy](https://github.com/linuxdeploy/linuxdeploy) or [appimagetool](https://github.com/AppImage/AppImageKit). Make sure you have 
 included the **update information** as given in the **AppImage specification** , Without the update information embeded in 
 the AppImage , the update will not work.
 
