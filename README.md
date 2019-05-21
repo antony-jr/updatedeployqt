@@ -97,7 +97,8 @@ We are repacking **qTox** AppImage along with our Auto updater.
    $ ./appimagetool-x86_64.AppImage \
                         -u "gh-releases-zsync|antony-jr|qTox|continuous|qtox-x86_64.AppImage.zsync" \
                         --no-appstream squashfs-root
-   $ ./qtox-x86_64.AppImage # The update should start in a second. 
+   $ # Down below is the new modified AppImage with no source change.
+   $ ./qTox-x86_64.AppImage # The update should start in a second. 
 ```
 
 
