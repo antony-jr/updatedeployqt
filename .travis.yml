@@ -15,6 +15,7 @@ script:
   - cd ..
   - wget -q http://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
   - chmod +x linuxdeploy-x86_64.AppImage
+  - export VERSION="continuous"
   - ./linuxdeploy-x86_64.AppImage --appdir appdir --output appimage
   - ls
 
