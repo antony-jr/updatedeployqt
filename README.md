@@ -16,7 +16,8 @@ executable and you are ready to go. This works in travis-ci and other such servi
 update directly on travis-ci.
 
 ```
- $ wget "https://github.com/TheFutureShell/updatedeployqt/releases/download/continuous/updatedeployqt-continuous-x86_64.AppImage"
+ $ wget \
+   "https://github.com/TheFutureShell/updatedeployqt/releases/download/continuous/updatedeployqt-continuous-x86_64.AppImage"
  $ chmod +x updatedeployqt-continuous-x86_64.AppImage
  $ ./updatedeployqt-continuous-x86_64.AppImage
 ```
@@ -79,19 +80,22 @@ do it. **However** you should know the **Qt major and minor version used in the 
 We are repacking **qTox** AppImage along with our Auto updater.
 
 ```
-   $ wget "https://github.com/qTox/qTox/releases/download/v1.16.3/qTox-v1.16.3.x86_64.AppImage"
+   $ wget \
+     "https://github.com/qTox/qTox/releases/download/v1.16.3/qTox-v1.16.3.x86_64.AppImage"
    $ chmod +x qTox-v1.16.3.x86_64.AppImage
    $ ./qTox-v1.16.3.x86_64.AppImage --appimage-extract # get the contents
    $ # We know qTox v1.16.3 uses Qt version 5.7.3 or so.
    $ # Download updatedeployqt 
-   $ wget "https://github.com/TheFutureShell/updatedeployqt/releases/download/continuous/updatedeployqt-continuous-x86_64.AppImage"
+   $ wget \
+     "https://github.com/TheFutureShell/updatedeployqt/releases/download/continuous/updatedeployqt-continuous-x86_64.AppImage"
    $ chmod +x updatedeployqt-continuous-x86_64.AppImage
    $ ./updatedeployqt-continuous-x86_64.AppImage AppImage squash-root/local/plugins/platforms/libqxcb.so -qv "5.7.0"
-   $ wget "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
+   $ wget \ 
+     "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
    $ chmod +x appimagetool-x86_64.AppImage
    $ # qTox does not provide any update info , so for demo we created a kind of proxy for that.
    $ ./appimagetool-x86 -u "" \
-                        --no-appstream squash-root
+                        --no-appstream squashfs-root
    $ # Now you should have qTox-x86_64.AppImage ? Something like that.
    $ ./qTox-x86_64.AppImage # The update should start in a second. 
 ```
