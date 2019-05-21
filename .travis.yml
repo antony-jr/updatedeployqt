@@ -1,0 +1,28 @@
+language: c
+compiler: gcc
+sudo: require
+dist: trusty
+
+before_install:
+  - sudo apt-get update -qq
+
+script:
+  - mkdir build
+  - cd build
+  - cmake .. -DCMAKE_INSTALL_PREFIX=/usr
+  - make -j$(nproc)
+  - make install DESTDIR=../appdir
+  - cd ..
+  - wget -q http://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+  - chmod +x linuxdeploy-x86_64.AppImage
+  - ./linuxdeploy-x86_64.AppImage --appdir appdir --output appimage
+  - ls
+
+after_success:
+  - wget "https://github.com/probonopd/uploadtool/raw/master/upload.sh"
+  - bash upload.sh updatedeployqt*.AppImage updatedeployqt*.AppImage*
+
+branches:
+  except:
+    - # Do not build tags that we create when we upload to GitHub Releases
+    - /^(?i:continuous)/
