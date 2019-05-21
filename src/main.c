@@ -15,7 +15,7 @@
 #define GHRELEASES_BRIDGE 3
 
 static char *get_bridge_path(const char *, const char *);
-static void install_appimage_updater_bridge(const char * , const char * , const char *);
+static int deploy_appimage_updater_bridge(const char * , const char *);
 
 int main(int argc , char **argv){
 	printf("updatedeployqt version 1-alpha (commit %s) , built on %s\n" , 
@@ -29,15 +29,14 @@ int main(int argc , char **argv){
 	      );
 	printf("copyright (C) 2019 the future shell laboratory , antony jr.\n");	
 	if(argc < 3){
-		printf("\nUsage: %s [BRIDGE] [PATH to libqtxcb.so] [OPTIONS]\n\n" , *argv);
+		printf("\nUsage: %s [BRIDGE] [PATH to libqxcb.so] [OPTIONS]\n\n" , *argv);
 		printf("BRIDGES: \n");
 		printf("    AppImage         deploy auto updater for AppImages\n");
 		printf("    QtInstaller      deploy auto updater for Qt Installer packaged Application\n");
 		printf("    GithubReleases   deploy auto updater for Qt Application released via Github\n\n");
 		printf("OPTIONS: \n");
-		printf("    -v,--verbose     turn on verbose mode.\n");
-		printf("    -q,--qmake       path to qmake binary to use.\n");
-		printf("   -qv,--qt-version use this qt version for downloading plugins.\n");
+		printf("    -q,--qmake       path to qmake binary to use to query qt version.\n");
+		printf("   -qv,--qt-version  assume this as the qt version.\n");
 		return 0;
 	}
 
@@ -45,7 +44,6 @@ int main(int argc , char **argv){
 
 	int ret = 0;	
 	short bridge = 0;
-	bool verbose = false;
 	char *qmake_path = NULL;
 	char *given_qtver = NULL;
 	char *qtxcb_so_path = NULL;
@@ -79,10 +77,6 @@ int main(int argc , char **argv){
 	}
 
 	while(*(++argv)){
-		if(!strcmp(*argv , "-v") ||
-		   !strcmp(*argv , "--verbose")){
-			verbose = true;	
-		}else
 		if(!strcmp(*argv , "-q") ||
 		   !strcmp(*argv , "--qmake")){
 			if(*(++argv)){
@@ -109,48 +103,41 @@ int main(int argc , char **argv){
 			goto cleanup;
 		}
 	}
-	
+
+	const char *qt_version = NULL;	
 	if(!(qmakep = 
 	        qmake_process_create((!qmake_path) ? "qmake" : qmake_path))){
-		printl(fatal , "cannot create qmake process");
+		printl(warning , "cannot create qmake process");
+	}else{
+	qt_version = qmake_query_result_value(
+					qmake_process_query(qmakep , "QT_VERSION")
+				 );
+	}
+
+
+	if(!qt_version  && !given_qtver){
+		printl(fatal , "no information on the qt version can be retrived , giving up");
 		ret = -1;
 		goto cleanup;
 	}
 
-	const char *qt_version = qmake_query_result_value(
-					qmake_process_query(qmakep , "QT_VERSION")
-				 );
-
-	const char *qt_libs    = qmake_query_result_value(
-					qmake_process_query(qmakep , "QT_INSTALL_LIBS")
-				 );
-	
-	if(verbose){
-		printl(info , "Qt version is %s" , qt_version);
-		printl(info , "Qt library install path %s" , qt_libs);
-		printl(info , "plugin at %s will be replaced with the correct modified version" , 
-				qtxcb_so_path);
+	if(given_qtver){
+		qt_version = given_qtver;
 	}
 
-	if(given_qtver && verbose){
-		printl(info , "will be using Qt version %s" , given_qtver);
-		if(strcmp(given_qtver , qt_version)){
-			printl(warning , "given qt version and host Qt version is not the same , may result in error");
-		}
-	}
+	printl(info , "Qt version to use %s" , qt_version);
+	printl(warning , "file '%s' will be replaced" , qtxcb_so_path);
 
 	switch(bridge){
 		case APPIMAGE_UPDATER_BRIDGE:
-			install_appimage_updater_bridge(qtxcb_so_path , (!given_qtver) ? qt_version : given_qtver ,qt_libs);
+			ret = deploy_appimage_updater_bridge(qtxcb_so_path , qt_version);
 			break;
 		default:
 			break;
 	}
 
 cleanup:
-	if(verbose){
-		printl(info , "cleaning up resources");
-	}
+	printl(info , "cleaning up resources");
 	qmake_process_destroy(qmakep);
 	if(qmake_path)
 		free(qmake_path);
@@ -162,11 +149,14 @@ cleanup:
 	return ret;
 }
 
-void install_appimage_updater_bridge(const char *qxcb , const char *qtver , const char *libs){
-	if(!qxcb || !qtver || !libs){
-		return;
+static int deploy_appimage_updater_bridge(const char *qxcb , const char *qtver){
+	if(!qxcb || !qtver){
+		return -1;
 	}
+
+	printl(info , "deploying AppImage updater bridge");
 	printl(info , "preparing for download");
+
 
 	const char *bridge_path = get_bridge_path(qxcb , "libAppImageUpdaterBridge.so");	
 	downloader_t *downloader = downloader_create();
@@ -223,19 +213,18 @@ void install_appimage_updater_bridge(const char *qxcb , const char *qtver , cons
 	}else{
 		printl(fatal , "your Qt%s is not supported , please try Qt5.6 and higher" , qtver);
 		downloader_destroy(downloader);
-		return;
+		return -1;
 	}
 
 	downloader_set_destination(downloader , qxcb); /* overwrite */
 	
 	/* Download the modified libqxcb.so plugin from the master repo 
 	 * at github. Also show progress. */
-	printl(info , "downloading modified qxcb plugin from %s , please wait" ,
-		downloader_get_url(downloader));
+	printl(info , "downloading modified qxcb plugin for Qt version %s..." , qtver);
 	if( 0 > downloader_exec(downloader)){
 		printl(fatal , "download failed for unknown reason");
 		downloader_destroy(downloader);
-		return;
+		return -1;
 	}
 
 
@@ -254,28 +243,28 @@ void install_appimage_updater_bridge(const char *qxcb , const char *qtver , cons
 			"libAppImageUpdaterBridge.so");
 	downloader_set_destination(downloader , bridge_path);
 
-	printl(info , "downloading bridge from %s" , downloader_get_url(downloader));
+	printl(info , "downloading bridge... ");
 
 	if(0 > downloader_exec(downloader)){
 		printl(fatal , "download failed for unknown reason");
 		downloader_destroy(downloader);
-		return;
+		return -1;
 	}
 	downloader_destroy(downloader);	
 
-	/* Now we need to write configuration. */
+	/* Now we need to write configuration. */	
 	do{
 		char md5sum[33];
 		memset(md5sum , 0 , sizeof(md5sum[0]) * 33);	
 		
 		/* Get MD5 sum of the bridge. */
+		printl(info , "computing md5 sum for '%s'" , bridge_path);
 		if(0 > MD5File(bridge_path , md5sum)){
 			printl(fatal , "cannot compute md5 sum for %s" , bridge_path);
 			continue;
 		}
 		printl(info , "md5 sum for '%s' is '%s'" , bridge_path , md5sum);
-		
-		
+			
 		config_writer_t *writer = config_writer_create(qxcb);
 		if( !config_writer_set_plugin_md5sum(writer,md5sum) ||
 		    !config_writer_set_slot_to_call(writer,"initAutoUpdate(void)")){
@@ -284,15 +273,15 @@ void install_appimage_updater_bridge(const char *qxcb , const char *qtver , cons
 		config_writer_destroy(writer);
 	}while(0);
 
-	printl(info , "successfully integrated AppImageUpdaterBridge");
-	return;
+	printl(info , "successfully deployed bridge");
+	return -1;
 }
 
-char *get_bridge_path(const char *qxcb , const char *bridge){
+static char *get_bridge_path(const char *qxcb , const char *bridge){
 	static char buf[200];
 	memset(buf , 0 , sizeof(buf[0]) * 200);
-	char *p = qxcb;
-	char *ins = strstr(p , "plugins");
+	const char *p = qxcb;
+	const char *ins = strstr(p , "plugins");
 	strncpy(buf , p , ins - p + 7);
 	strcpy(buf + strlen(buf) , "/");
 	strcpy(buf + strlen(buf) , bridge);
