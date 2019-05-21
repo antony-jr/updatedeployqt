@@ -2,9 +2,9 @@
 #define DOWNLOADER_H_INCLUDED
 #include <curl/curl.h>
 typedef struct {
-	CURL *handle;
-	char *url;
-	char *output;
+    CURL *handle;
+    char *url;
+    char *output;
 } downloader_t;
 
 downloader_t *downloader_create();

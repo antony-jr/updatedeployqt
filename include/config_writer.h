@@ -3,9 +3,9 @@
 #include <stdio.h>
 
 typedef struct {
-	FILE *fp;
-	char plugin_md5_sum_placeholder[33];
-	char slot_name_placeholder[33];
+    FILE *fp;
+    char plugin_md5_sum_placeholder[33];
+    char slot_name_placeholder[33];
 } config_writer_t;
 
 config_writer_t *config_writer_create(const char*);
