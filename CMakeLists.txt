@@ -27,3 +27,9 @@ add_executable(updatedeployqt src/qmake_process.c
 			      include/config_writer.h)
 target_link_libraries(updatedeployqt PUBLIC curl)
 target_include_directories(updatedeployqt PUBLIC . include)
+
+
+install(
+	TARGETS updatedeployqt
+	RUNTIME DESTINATION bin
+)
