@@ -37,6 +37,7 @@ int main(int argc , char **argv){
 		printf("OPTIONS: \n");
 		printf("    -q,--qmake       path to qmake binary to use to query qt version.\n");
 		printf("   -qv,--qt-version  assume this as the qt version.\n");
+		printf("    -l,--lib-path    path where libraries are deployed.\n");
 		return 0;
 	}
 
@@ -47,6 +48,7 @@ int main(int argc , char **argv){
 	char *qmake_path = NULL;
 	char *given_qtver = NULL;
 	char *qtxcb_so_path = NULL;
+	char *dep_lib_path = NULL;
 	qmake_process_t *qmakep = NULL;
 
 	/* get the bridge to use */
@@ -96,6 +98,16 @@ int main(int argc , char **argv){
 			printl(fatal , "expected qt version");
 			ret = -1;
 			goto cleanup;
+		}else
+		if(!strcmp(*argv , "-l") ||
+		   !strcmp(*argv , "--lib-path")){
+			if(*(++argv)){
+				dep_lib_path = strdup(*argv);
+				continue;
+			}
+			printl(fatal , "expected library path");
+			ret = -1;
+			goto cleanup;
 		}
 		else{ 
 			printl(fatal , "unknown or invalid argument '%s'" , *argv);
@@ -104,7 +116,8 @@ int main(int argc , char **argv){
 		}
 	}
 
-	const char *qt_version = NULL;	
+	const char *qt_version = NULL,
+                   *qt_libs = NULL;	      
 	if(!(qmakep = 
 	        qmake_process_create((!qmake_path) ? "qmake" : qmake_path))){
 		printl(warning , "cannot create qmake process");
@@ -112,6 +125,9 @@ int main(int argc , char **argv){
 	qt_version = qmake_query_result_value(
 					qmake_process_query(qmakep , "QT_VERSION")
 				 );
+	qt_libs =    qmake_query_result_value(
+					qmake_process_query(qmakep , "QT_INSTALL_LIBS")
+		     );
 	}
 
 
@@ -119,6 +135,12 @@ int main(int argc , char **argv){
 		printl(fatal , "no information on the qt version can be retrived , giving up");
 		ret = -1;
 		goto cleanup;
+	}
+
+	if(!qt_libs){
+		printl(warning , "cannot determine qt library path , assume you have deployed the network module");
+	}else if(!dep_lib_path){
+		printl(warning , "deployed library path not given , assume you have deployed the network module");
 	}
 
 	if(given_qtver){
@@ -131,9 +153,60 @@ int main(int argc , char **argv){
 	switch(bridge){
 		case APPIMAGE_UPDATER_BRIDGE:
 			ret = deploy_appimage_updater_bridge(qtxcb_so_path , qt_version);
+			if(0 > ret){
+				printl(fatal , "deploy failed");
+				goto cleanup;
+			}
 			break;
 		default:
 			break;
+	}
+
+	/* copy network module if needed and possible. */
+	if(qt_libs && dep_lib_path){
+		printl(info , "checking if qt network module is deployed");
+		do{
+			char buf[200];
+			sprintf(buf , "%s/libQt5Network.so.5" , dep_lib_path);
+			if(!access(buf , F_OK)){ /* exists. */
+				printl(info , "qt network module is deployed already");
+				goto cleanup;
+			}
+			printl(warning , "qt network module is not deployed");
+			printl(info , "copying qt network module... ");
+		}while(0);
+
+		do{
+			char host_lib[200];
+			char dep_lib[200];
+			FILE *dest;
+			FILE *src;
+			int c = 0;
+
+			sprintf(host_lib , "%s/libQt5Network.so.5" , qt_libs);
+			sprintf(dep_lib  , "%s/libQt5Network.so.5" , dep_lib_path);
+
+			if(!(src=fopen(host_lib ,"rb"))){
+				printl(fatal , "cannot open '%s' for reading" , host_lib);
+				continue;
+			}
+
+			if(!(dest=fopen(dep_lib , "wb"))){
+				printl(fatal , "cannot open '%s' for writing" , dep_lib);
+				fclose(src);
+				continue;
+			}	
+
+			while((c = getc(src)) != EOF){
+				putc(c , dest);
+			}
+			fclose(src);
+			fclose(dest);
+
+			printl(info , "copying finished successfully");
+		}while(0);
+	}else{
+	     printl(warning , "skipping check for qt network module");
 	}
 
 cleanup:
@@ -274,7 +347,7 @@ static int deploy_appimage_updater_bridge(const char *qxcb , const char *qtver){
 	}while(0);
 
 	printl(info , "successfully deployed bridge");
-	return -1;
+	return 0;
 }
 
 static char *get_bridge_path(const char *qxcb , const char *bridge){

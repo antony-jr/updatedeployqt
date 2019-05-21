@@ -14,11 +14,11 @@ int printl(log_class_t class, const char *fmt , ...){
 	strftime(time_string, sizeof(time_string), "%H:%M:%S", time_info);
 	printf("[ %s ] " , time_string);
 	if(class == info){
-		printf("INFO   ");
+		printf("    \e[0;34mINFO\e[0m ");
 	}else if(class == warning){
-		printf("WARNING");
+		printf(" \e[0;33mWARNING\e[0m ");
 	}else{
-		printf("FATAL  ");
+		printf("   \e[0;31mFATAL\e[0m ");
 	}
 	printf(" : ");
 	vprintf(fmt , ap);
