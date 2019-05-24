@@ -81,8 +81,7 @@ qmake_process_t *qmake_process_create(const char *prog) {
     }
     strcpy(qp->program_path, prog);
     *(qp->program_path + len) = ' ';
-    strcpy(qp->program_path + len + 1, "-query ");  /* add command argument. */
-    qp->program_path_offset = strlen(qp->program_path);
+    qp->program_path_offset = len;
     return qp;
 }
 
@@ -96,7 +95,40 @@ void qmake_process_destroy(qmake_process_t *qp) {
     free(qp);
 }
 
+int qmake_process_build_project(qmake_process_t *qp , const char *project_file){
+	if(!qp || !project_file){
+		return -1;
+	}
+	FILE *fp = NULL;
+
+	/* Set the command */	
+	sprintf(qp->program_path + qp->program_path_offset , " %s" , project_file);
+
+
+	/* execute command. */
+	if(!(fp = popen(qp->program_path, "r"))) {
+		return -1;
+	}
+
+	while(!feof(fp)){
+		(void)getc(fp);
+	}
+	pclose(fp); /* We don't need the output. */
+	
+	if(!(fp = popen("make -j4 && make -j$(nproc)" , "r"))){
+		return -1;
+	}
+	while(!feof(fp)){
+		(void)getc(fp);
+	}
+	pclose(fp);
+	return 0;
+}
+
 qmake_query_result_t *qmake_process_query(qmake_process_t *qp, const char *qry) {
+    if(!qp || !qry){
+    	return NULL;
+    }
     FILE *fp = NULL;
     qmake_query_result_t **p = NULL;
     qmake_query_result_t *qr = NULL;
@@ -106,7 +138,7 @@ qmake_query_result_t *qmake_process_query(qmake_process_t *qp, const char *qry) 
     char *output = calloc(1, sizeof(char));
 
     /* append query to the program. */
-    strcpy(qp->program_path + qp->program_path_offset, qry);
+    sprintf(qp->program_path + qp->program_path_offset , " -query %s" , qry);
 
     /* execute command. */
 #ifdef __linux__

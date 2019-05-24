@@ -2,8 +2,11 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <ctype.h>
 #include <unistd.h>
+#include <dirent.h>
 #include <qmake_process.h>
+#include <ldd_process.h>
 #include <config_writer.h>
 #include <downloader.h>
 #include <logger.h>
@@ -15,6 +18,8 @@
 #define GHRELEASES_BRIDGE 3
 
 static char *get_bridge_path(const char *, const char *);
+static int copy_file(const char * , const char *);
+static int deploy_plugin_injector(const char * , const char * , downloader_t*);
 static int deploy_appimage_updater_bridge(const char *, const char *);
 
 int main(int argc, char **argv) {
@@ -166,8 +171,8 @@ int main(int argc, char **argv) {
             sprintf(buf, "%s/libQt5Network.so.5", dep_lib_path);
             if(!access(buf, F_OK)) { /* exists. */
                 printl(info, "qt network module is deployed already");
-                goto cleanup;
-            }
+		goto deploy_network_deps;
+	    }
             printl(warning, "qt network module is not deployed");
             printl(info, "copying qt network module... ");
         } while(0);
@@ -175,36 +180,91 @@ int main(int argc, char **argv) {
         do {
             char host_lib[200];
             char dep_lib[200];
-            FILE *dest;
-            FILE *src;
-            int c = 0;
 
             sprintf(host_lib, "%s/libQt5Network.so.5", qt_libs);
             sprintf(dep_lib, "%s/libQt5Network.so.5", dep_lib_path);
-
-            if(!(src=fopen(host_lib,"rb"))) {
-                printl(fatal, "cannot open '%s' for reading", host_lib);
-                continue;
-            }
-
-            if(!(dest=fopen(dep_lib, "wb"))) {
-                printl(fatal, "cannot open '%s' for writing", dep_lib);
-                fclose(src);
-                continue;
-            }
-
-            while((c = getc(src)) != EOF) {
-                putc(c, dest);
-            }
-            fclose(src);
-            fclose(dest);
-
-            printl(info, "copying finished successfully");
+	    if(!copy_file(dep_lib , host_lib)){
+		    printl(info, "copying finished successfully");
+	    }else{
+		    printl(warning , "copy failed , giving up.");
+		    goto cleanup;
+	    }
         } while(0);
     } else {
         printl(warning, "skipping check for qt network module");
+	goto cleanup;
+    } 
+
+deploy_network_deps:
+    printl(info , "searching for openssl libraries required for qt network module");
+
+    int copied = 0; /* no. of copied files */
+    /* Lets first try searching for openssl libs from libQt5Network.so.5 */
+    do{
+	    ldd_process_t *ldd = ldd_process_create("ldd");
+	    if(!ldd){
+		    printl(warning , "cannot create ldd process");
+		    break;
+	    }
+
+            char dep_lib[200];
+            sprintf(dep_lib, "%s/libQt5Network.so.5", dep_lib_path);
+
+	    ldd_query_result_t *head = ldd_process_get_required_libs(ldd , dep_lib);
+
+	    for(ldd_query_result_t *p = head; p ; p = p->next){
+		    if(!strstr("libcrypt" , p->library) &&
+		       !strstr("libssl" , p->library)){
+			    continue;
+		    }
+
+		    char *dest_path = calloc(1 , sizeof(*dest_path) * (strlen(dep_lib_path) + strlen(p->library) + 2));
+		    sprintf(dest_path , "%s/%s" , dep_lib_path , p->library);
+		    if(copy_file(dest_path , p->path)){
+			    printl(fatal , "cannot copy %s to %s" , p->library , dest_path);
+			    free(dest_path);
+			    continue;
+		    }
+		    copied += 1; 
+		    printl(info , "copied %s to %s" , p->library , dest_path);
+		    free(dest_path);
+	    }
+
+	    ldd_process_destroy(ldd);
+    }while(0);
+
+    if(!copied){
+	    printl(info , "cannot find openssl libraries as required by libQt5Network.so.5");
+	    printl(info , "searching for openssl libraries from host system library path");
+
+	    do{
+		struct dirent *de;
+		DIR *dr = opendir(qt_libs);
+		if (dr == NULL){
+			printl(fatal , "cannot open directory , giving up");
+			break;
+		} 
+		while ((de = readdir(dr)) != NULL){
+			if(!strstr(de->d_name , "libcrypt") &&
+			   !strstr(de->d_name , "libssl")){
+				continue;
+			}
+
+			char *source = calloc(1 , sizeof(*source) * (strlen(qt_libs) + strlen(de->d_name) + 2));
+			sprintf(source , "%s/%s" , qt_libs , de->d_name);
+
+			char *destination = calloc(1 , sizeof(*destination) * (strlen(dep_lib_path) +
+								   strlen(de->d_name) + 3));
+			sprintf(destination , "%s/%s" , dep_lib_path , de->d_name);
+			copy_file(destination ,source);
+			free(source);
+			free(destination);
+		}
+		closedir(dr);
+	   }while(0);
     }
 
+    printl(info , "all required openssl libraries are deployed");
 cleanup:
     printl(info, "cleaning up resources");
     qmake_process_destroy(qmakep);
@@ -218,17 +278,38 @@ cleanup:
     return ret;
 }
 
-static int deploy_appimage_updater_bridge(const char *qxcb, const char *qtver) {
-    if(!qxcb || !qtver) {
-        return -1;
-    }
+static int copy_file(const char *dest , const char *src){
+	if(!dest || !src){
+		return -1;
+	}
+	printl(info , "copy file from %s to %s" , src , dest);
+	FILE *dest_fp;
+        FILE *src_fp;
+        int c = 0;
 
-    printl(info, "deploying AppImage updater bridge");
-    printl(info, "preparing for download");
+        if(!(src_fp=fopen(src,"rb"))) {
+                printl(fatal, "cannot open '%s' for reading", src);
+                return -1;
+        }
 
+        if(!(dest_fp=fopen(dest, "wb"))) {
+                printl(fatal, "cannot open '%s' for writing", dest);
+                fclose(src_fp);
+		return -1;
+	}
 
-    const char *bridge_path = get_bridge_path(qxcb, "libAppImageUpdaterBridge.so");
-    downloader_t *downloader = downloader_create();
+        while((c = getc(src_fp)) != EOF) {
+                putc(c, dest_fp);
+        }
+        fclose(src_fp);
+        fclose(dest_fp);
+	return 0;
+}
+
+static int deploy_plugin_injector(const char *qxcb , const char *qtver , downloader_t *downloader){
+	if(!qxcb || !qtver || !downloader){
+		return -1;
+	}
     if(qtver[0] == '5' &&
             qtver[2] == '6' &&
             qtver[3] == '.') { /* Qt5.6.xx */
@@ -281,7 +362,6 @@ static int deploy_appimage_updater_bridge(const char *qxcb, const char *qtver) {
 
     } else {
         printl(fatal, "your Qt%s is not supported , please try Qt5.6 and higher", qtver);
-        downloader_destroy(downloader);
         return -1;
     }
 
@@ -292,10 +372,26 @@ static int deploy_appimage_updater_bridge(const char *qxcb, const char *qtver) {
     printl(info, "downloading modified qxcb plugin for Qt version %s...", qtver);
     if( 0 > downloader_exec(downloader)) {
         printl(fatal, "download failed for unknown reason");
-        downloader_destroy(downloader);
+        return -1;
+    }
+    return 0;
+}
+
+static int deploy_appimage_updater_bridge(const char *qxcb, const char *qtver) {
+    if(!qxcb || !qtver) {
         return -1;
     }
 
+    printl(info, "deploying AppImage updater bridge");
+    printl(info, "preparing for download");
+
+
+    const char *bridge_path = get_bridge_path(qxcb, "libAppImageUpdaterBridge.so");
+    downloader_t *downloader = downloader_create();
+    if(0 > deploy_plugin_injector(qxcb , qtver , downloader)){
+	    downloader_destroy(downloader);
+	    return -1;
+    }
 
     /* Now downlaod the AppImageUpdagerBridge which is compiled with
      * Qt5.6.0
