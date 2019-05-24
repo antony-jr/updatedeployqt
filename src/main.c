@@ -199,7 +199,9 @@ deploy_network_deps:
     printl(info , "searching for openssl libraries required for qt network module");
 
     int copied = 0; /* no. of copied files */
+
     /* Lets first try searching for openssl libs from libQt5Network.so.5 */
+ /*
     do{
 	    ldd_query_result_t *p = NULL;
 	    ldd_process_t *ldd = ldd_process_create("ldd");
@@ -232,6 +234,7 @@ deploy_network_deps:
 
 	    ldd_process_destroy(ldd);
     }while(0);
+*/
 
     if(!copied){
 	    printl(info , "cannot find openssl libraries as required by libQt5Network.so.5");
