@@ -17,7 +17,7 @@ script:
   - chmod +x linuxdeploy-x86_64.AppImage
   - export VERSION="continuous"
   - ./linuxdeploy-x86_64.AppImage --appdir appdir --output appimage
-  - ls
+  - ldd
 
 after_success:
   - wget "https://github.com/probonopd/uploadtool/raw/master/upload.sh"
