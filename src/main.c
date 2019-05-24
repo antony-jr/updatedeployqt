@@ -201,7 +201,9 @@ deploy_network_deps:
     int copied = 0; /* no. of copied files */
     /* Lets first try searching for openssl libs from libQt5Network.so.5 */
     do{
+	    ldd_query_result_t *p = NULL;
 	    ldd_process_t *ldd = ldd_process_create("ldd");
+	    
 	    if(!ldd){
 		    printl(warning , "cannot create ldd process");
 		    break;
@@ -209,12 +211,10 @@ deploy_network_deps:
 
             char dep_lib[200];
             sprintf(dep_lib, "%s/libQt5Network.so.5", dep_lib_path);
-
-	    ldd_query_result_t *head = ldd_process_get_required_libs(ldd , dep_lib);
-
-	    for(ldd_query_result_t *p = head; p ; p = p->next){
-		    if(!strstr("libcrypt" , p->library) &&
-		       !strstr("libssl" , p->library)){
+	    
+	    for(p = ldd_process_get_required_libs(ldd , dep_lib); p ; p = p->next){
+		    if(!strstr(p->library , "libcrypt") &&
+		       !strstr(p->library , "libssl")){
 			    continue;
 		    }
 
