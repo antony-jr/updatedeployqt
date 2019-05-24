@@ -192,7 +192,6 @@ int main(int argc, char **argv) {
         } while(0);
     } else {
         printl(warning, "skipping check for qt network module");
-	goto cleanup;
     } 
 
 deploy_network_deps:
@@ -213,8 +212,8 @@ deploy_network_deps:
 				continue;
 			}
 
-			char *source = calloc(1 , sizeof(*source) * (strlen(qt_libs) + strlen(de->d_name) + 2));
-			sprintf(source , "%s/%s" , qt_libs , de->d_name);
+			char *source = calloc(1 , sizeof(*source) * (strlen(system_libs) + strlen(de->d_name) + 2));
+			sprintf(source , "%s/%s" , system_libs , de->d_name);
 
 			char *destination = calloc(1 , sizeof(*destination) * (strlen(dep_lib_path)+strlen(de->d_name) + 3));
 			sprintf(destination , "%s/%s" , dep_lib_path , de->d_name);

@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED( VERSION 3.2)
+CMAKE_MINIMUM_REQUIRED( VERSION 2.8)
 project(updatedeployqt)
 
 # Let cmake know that this is a release build.
