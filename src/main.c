@@ -195,6 +195,11 @@ int main(int argc, char **argv) {
     } 
 
 deploy_network_deps:
+
+    if(!dep_lib_path){
+	    goto cleanup;
+    }
+
     printl(info , "searching for openssl libraries from host system library path");
     do{
 	    char *system_libs = get_system_library_path();
