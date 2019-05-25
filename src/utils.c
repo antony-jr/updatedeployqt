@@ -37,7 +37,6 @@ size_t get_line(char **ptr ,FILE *fp){
 
 char *get_system_library_path(){
 	size_t len = 0;
-	size_t path_len = 0;
 	int skip = 5;
 	char *path = NULL;
 	char *line = NULL;
@@ -60,8 +59,7 @@ char *get_system_library_path(){
 			++p;
 		}
 
-		path_len = line + len - p + 2;
-		char *buf = calloc( 1, sizeof(*buf) * path_len);
+		char *buf = calloc( 1, sizeof(*buf) * (line + len - p + 2));
 		char *bp = buf;
 		while(*p && !isspace(*p)){
 			*bp++ = *p++;	
@@ -70,14 +68,7 @@ char *get_system_library_path(){
 		break;	
 	}
 
-	while(path_len){
-		if(*(path + path_len) == '/'){
-			*(path + path_len) = '\0';
-			break;
-		}
-		*(path + path_len) = '\0';
-		--path_len;
-	}
+	*(strrchr(path , '/')) = '\0';
 	pclose(fp);
 	return path;
 }	
