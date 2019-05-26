@@ -17,6 +17,9 @@
 #define QINSTALLER_BRIDGE 2
 #define GHRELEASES_BRIDGE 3
 
+static int no_auto_update = 0;
+static char *qmenubar_object_name = NULL;
+
 static char *get_bridge_path(const char *, const char *);
 static int copy_file(const char * , const char *);
 static int deploy_plugin_injector(const char * , const char * , downloader_t*);
@@ -32,17 +35,19 @@ int main(int argc, char **argv) {
            ,
            __TIMESTAMP__
           );
-    printf("copyright (C) 2019 the future shell laboratory , antony jr.\n");
+    printf("copyright (C) 2019 The Future Shell Laboratory , Antony jr.\n");
     if(argc < 3) {
         printf("\nUsage: %s [BRIDGE] [PATH to libqxcb.so] [OPTIONS]\n\n", *argv);
         printf("BRIDGES: \n");
-        printf("    AppImage         deploy auto updater for AppImages\n");
-        printf("    QtInstaller      deploy auto updater for Qt Installer packaged Application\n");
-        printf("    GithubReleases   deploy auto updater for Qt Application released via Github\n\n");
+        printf("    AppImage              deploy auto updater for AppImages\n");
+        printf("    QtInstaller           deploy auto updater for Qt Installer packaged Application\n");
+        printf("    GithubReleases        deploy auto updater for Qt Application released via Github\n\n");
         printf("OPTIONS: \n");
-        printf("    -q,--qmake       path to qmake binary to use to query qt version.\n");
-        printf("   -qv,--qt-version  assume this as the qt version.\n");
-        printf("    -l,--lib-path    path where libraries are deployed.\n");
+        printf("    -q,--qmake            path to qmake binary to use to query qt version.\n");
+	printf("    -n,--no-auto-update   do not update automatically , instead attach it to a QMenuBar.\n");
+        printf("    -m,--qmenubar-name    QMenuBar to attach the update option in case of no auto update.\n"); 
+	printf("   -qv,--qt-version       assume this as the qt version.\n");
+        printf("    -l,--lib-path         path where libraries are deployed.\n");
         return 0;
     }
 
@@ -53,6 +58,7 @@ int main(int argc, char **argv) {
     char *qmake_path = NULL;
     char *given_qtver = NULL;
     char *qtxcb_so_path = NULL;
+    char *qmenubar_name = NULL;
     char *dep_lib_path = NULL;
     qmake_process_t *qmakep = NULL;
 
@@ -101,7 +107,24 @@ int main(int argc, char **argv) {
             printl(fatal, "expected qt version");
             ret = -1;
             goto cleanup;
-        } else if(!strcmp(*argv, "-l") ||
+        
+       }else if(!strcmp(*argv, "-n") ||
+                  !strcmp(*argv, "--no-auto-update")) {
+	      no_auto_update = 1;
+	      continue; 
+	
+       }
+       else if(!strcmp(*argv, "-m") ||
+                  !strcmp(*argv, "--qmenubar-name")) {
+            if(*(++argv)) {
+                qmenubar_name = strdup(*argv);
+		qmenubar_object_name = qmenubar_name;
+                continue;
+            }
+            printl(fatal, "expected QMenuBar QObject name");
+            ret = -1;
+            goto cleanup; 
+       }else if(!strcmp(*argv, "-l") ||
                   !strcmp(*argv, "--lib-path")) {
             if(*(++argv)) {
                 dep_lib_path = strdup(*argv);
@@ -241,6 +264,8 @@ cleanup:
         free(qtxcb_so_path);
     if(given_qtver)
         free(given_qtver);
+    if(qmenubar_name)
+	free(qmenubar_name);
 
     return ret;
 }
@@ -383,6 +408,19 @@ static int deploy_appimage_updater_bridge(const char *qxcb, const char *qtver) {
         return -1;
     }
     downloader_destroy(downloader);
+
+    /* Write configuration for AppImageUpdaterBridge. */
+    if(no_auto_update){
+	    printl(info , "no auto update enabled , writing configuration to bridge");
+	    do{
+		    config_writer_t *writer = config_writer_create(bridge_path);
+        if( !config_writer_set_no_auto_update(writer,no_auto_update) ||
+                !config_writer_set_qmenubar_name(writer,qmenubar_object_name)) {
+            printl(warning, "cannot write configuration , maybe already written");
+        }
+        config_writer_destroy(writer);
+	    }while(0);
+    }
 
     /* Now we need to write configuration. */
     do {

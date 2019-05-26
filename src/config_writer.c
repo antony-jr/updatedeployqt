@@ -52,6 +52,8 @@ config_writer_t *config_writer_create(const char *filename) {
 
     strcpy(obj->plugin_md5_sum_placeholder, "8cfaddf5b1a24d1fd31cab97b01f1f87");
     strcpy(obj->slot_name_placeholder, "f80b03178d4080a30c14e71bbbe6e31b");
+    strcpy(obj->no_update_placeholder , "68b329da9893e34099c7d8ad5cb9c940");
+    strcpy(obj->qmenubar_object_name_placeholder , "bfa40825ef36e05bbc2c561595829a92");
     return obj;
 }
 
@@ -75,4 +77,23 @@ int config_writer_set_slot_to_call(config_writer_t *obj, const char *slot_name) 
     memset(slot_buffer, 0, sizeof(slot_buffer[0]) * 33);
     strcpy(slot_buffer, slot_name);
     return find_offset_and_write(obj->fp, obj->slot_name_placeholder, slot_buffer, 1);
+}
+
+int config_writer_set_no_auto_update(config_writer_t *obj, int opt){
+    if(!opt){
+	    return 1;
+    }
+    char option_buffer[33];
+    memset(option_buffer, 0, sizeof(option_buffer[0]) * 33);
+    strcpy(option_buffer, "8cfaddf5b1a24d1fd31cab97b01f1f87");
+    return find_offset_and_write(obj->fp, obj->no_update_placeholder, option_buffer, 0);
+}
+int config_writer_set_qmenubar_name(config_writer_t *obj,const char *name){
+    if(!name){
+	    return 1;
+    }
+    char name_buffer[33];
+    memset(name_buffer, 0, sizeof(name_buffer[0]) * 33);
+    strcpy(name_buffer, name);
+    return find_offset_and_write(obj->fp, obj->qmenubar_object_name_placeholder, name_buffer, 0);
 }
