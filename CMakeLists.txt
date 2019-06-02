@@ -15,9 +15,17 @@ include_directories(.)
 include_directories(include)
 
 
-add_definitions(-DGIT_COMMIT_STR="${GIT_COMMIT_STR}")
+add_definitions(-DJSON_TRACK_SOURCE) # tell json-parser to track the line from json files.
+
+if(GIT_COMMIT_STR)
+	add_definitions(-DGIT_COMMIT_STR="${GIT_COMMIT_STR}")
+endif()
+
 add_executable(updatedeployqt src/qmake_process.c
 			      src/logger.c
+			      src/json.c
+			      src/args_parser.c
+			      src/config_manager.c
 			      src/md5.c 
 			      src/downloader.c
 			      src/config_writer.c
@@ -26,13 +34,15 @@ add_executable(updatedeployqt src/qmake_process.c
 			      include/logger.h 
 			      include/qmake_process.h
 			      include/md5.h
+			      include/args_parser.h
+			      include/config_manager.h
+			      include/json.h
 			      include/downloader.h
 			      include/utils.h
 			      include/config_writer.h)
 
-target_link_libraries(updatedeployqt PUBLIC curl)
+target_link_libraries(updatedeployqt PUBLIC curl m)
 target_include_directories(updatedeployqt PUBLIC . include)
-
 
 install(
 	TARGETS updatedeployqt
