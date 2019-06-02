@@ -26,19 +26,19 @@ add_executable(updatedeployqt src/qmake_process.c
 			      src/json.c
 			      src/args_parser.c
 			      src/config_manager.c
+			      src/deploy_info.c
 			      src/md5.c 
 			      src/downloader.c
 			      src/config_writer.c
-			      src/utils.c
 			      src/main.c 
 			      include/logger.h 
 			      include/qmake_process.h
 			      include/md5.h
+			      include/deploy_info.h
 			      include/args_parser.h
 			      include/config_manager.h
 			      include/json.h
 			      include/downloader.h
-			      include/utils.h
 			      include/config_writer.h)
 
 target_link_libraries(updatedeployqt PUBLIC curl m)
