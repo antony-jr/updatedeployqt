@@ -128,6 +128,9 @@ int main(int argc, char **argv) {
 
 	printl(info , "qt plugin injections was successful");
 
+
+	/* Lets check if the user deployed qt network module */
+
 cleanup:
 	print_conclusion(r);
 	deploy_info_destroy(dinfo);

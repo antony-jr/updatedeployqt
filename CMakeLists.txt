@@ -24,6 +24,7 @@ endif()
 add_executable(updatedeployqt src/qmake_process.c
 			      src/logger.c
 			      src/json.c
+			      src/utils.c
 			      src/args_parser.c
 			      src/config_manager.c
 			      src/deploy_info.c
@@ -36,6 +37,7 @@ add_executable(updatedeployqt src/qmake_process.c
 			      include/logger.h 
 			      include/qmake_process.h
 			      include/md5.h
+			      include/utils.h
 			      include/deploy_info.h
 			      include/injector.h
 			      include/bridge_deployer.h

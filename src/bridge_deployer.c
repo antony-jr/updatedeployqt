@@ -3,6 +3,7 @@
 #include <downloader.h>
 #include <deploy_info.h>
 #include <logger.h>
+#include <utils.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -13,55 +14,6 @@ const char *qmenu_name_placeholder = "871abbc22416bb25429594dec45caf1f";
 const char *qmenubar_name_placeholder = "bfa40825ef36e05bbc2c561595829a92";
 const char *qpushbutton_name_placeholder = "930b29debfb164461b39342d59e2565c";
 const char *boolean_string_placeholder = "4c6160c2d6bfeba1";
-
-static int read_bytes(FILE *fp , char **buffer , size_t n){
-	long int pos = 0;
-	int r = 0;
-	pos = ftell(fp); /* Make it as if one byte is only read. */
-	r = fread(*buffer , sizeof(**buffer) , n , fp);
-	fseek(fp , pos , SEEK_SET);
-	if(getc(fp) == EOF){
-		return 0; 
-	}
-	return (r<=0) ? 0 : r;
-}
-
-static int find_offset_and_write(FILE *fp, const char *to_find, const char *replace, size_t to_write){
-    char *buffer = NULL;
-    int r = 0;
-    buffer = calloc(1 , sizeof(*buffer) * to_write);
-    if(!buffer){
-	    return -1;
-    }
-    if(!replace || !to_find || !fp) {
-        free(buffer);
-	return -1;
-    }
-
-    rewind(fp);
-
-    /* Check if we have an empty file. */
-    if(feof(fp)) {
-	free(buffer);
-        return -1;
-    }
-
-    while(1) {
-        memset(buffer, 0, sizeof(*buffer) * to_write);
-        if(read_bytes(fp , &buffer , to_write) == 0){
-		break;
-	}
-        if(!strncmp(buffer, to_find , to_write)) {
-            fseek(fp, (ftell(fp) - 1), SEEK_SET);
-            fwrite(replace, sizeof *replace, to_write, fp);
-            ++r;
-        }
-    }
-    free(buffer);
-    return r;
-}
-
-
 
 bridge_deployer_t *bridge_deployer_create(config_manager_t *manager,
 					  downloader_t *downloader,
@@ -155,7 +107,6 @@ int bridge_deployer_run(bridge_deployer_t *obj){
 	 * the downloader will copy them. */
 	free(bridge_url);
 
-#if 0
 	/* run the downloader , if fails try four times. */
 	while(1){
 		printl(info , "downloading %s bridge from upstream.." , bridge_name);
@@ -171,7 +122,7 @@ int bridge_deployer_run(bridge_deployer_t *obj){
 		}
 		break;
 	}
-#endif 
+	
 	/* Now write configuration to the bridge machine code directly.
 	 * We will use predefined placeholders in the binary to replace them 
 	 * with our valid configuration. */
