@@ -4,6 +4,7 @@
 #include <downloader.h>
 #include <args_parser.h>
 #include <deploy_info.h>
+#include <bridge_deployer.h>
 #include <logger.h>
 
 static void print_header();
@@ -19,6 +20,7 @@ int main(int argc, char **argv) {
 	deploy_info_t *dinfo = NULL;
 	downloader_t *downloader = NULL;
 	config_manager_t *cmanager = NULL;
+	bridge_deployer_t *bdeployer = NULL;
 	args_parser_t *ap = args_parser_create(argc,argv,
 			                       print_header , print_help);
 
@@ -94,12 +96,32 @@ int main(int argc, char **argv) {
 	printl(info , "deploy plugins path: %s" , deploy_info_plugins_directory(dinfo));
 	printl(info , "QXcb plugin path: %s" , deploy_info_qxcb_plugin_path(dinfo));
 
+
+	/* Now lets download , and write configuration on the required bridge 
+	 * in the plugins directory. */
+	if(!(bdeployer = bridge_deployer_create(cmanager , downloader , dinfo))){
+		r = -1;
+		goto cleanup;
+	}
+
+	if(bridge_deployer_run(bdeployer) < 0){
+		r = -1;
+		goto cleanup;
+	}
+
+	printl(info , "deployed bridge successfully!");
+
+	/* Now lets download , and write configuration on the qxcb plugin 
+	 * in the plugins directory. */
+
+
 cleanup:
 	print_conclusion(r);
 	deploy_info_destroy(dinfo);
 	args_parser_destroy(ap);
 	config_manager_destroy(cmanager);
 	downloader_destroy(downloader);
+	bridge_deployer_destroy(bdeployer);
 	if(rbuf){
 		free(rbuf);
 	}

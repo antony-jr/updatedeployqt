@@ -252,6 +252,13 @@ int deploy_info_gather(deploy_info_t *obj){
 	return 0;
 }
 
+const char *deploy_info_directory(deploy_info_t *obj){
+	if(!obj){
+		return NULL;
+	}
+	return obj->deploy_dir;
+}
+
 const char *deploy_info_system_library_directory(deploy_info_t *obj){
 	if(!obj){
 		return NULL;

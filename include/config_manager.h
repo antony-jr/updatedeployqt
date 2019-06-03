@@ -13,6 +13,10 @@
 #define CONFIG_MANAGER_QPUSHBUTTON_GIVEN 7
 #define CONFIG_MANAGER_INTERVAL_GIVEN 8
 
+/* Some hardcoded values. */
+#define CONFIG_MANAGER_BOOLEAN_STRING_LEN 8
+#define CONFIG_MANAGER_OBJECT_STRING_LEN 32
+
 typedef struct {
 	char *config_file;
 	char *qtversion;
@@ -22,7 +26,7 @@ typedef struct {
 	char *qpushbutton_name;
 	int   interval; /* in miliseconds */
 
-	char booleans[8];
+	char booleans[9];
         /* 
 	 * booleans[0] - If set then auto update check is enabled
 	 * booleans[1] - If set then auto update check should occur on startup of the 
@@ -49,6 +53,7 @@ int config_manager_run(config_manager_t*);
  * This table is mentioned above. */
 const char *config_manager_get_boolean_string(config_manager_t*);
 
+const char *config_manager_get_bridge_name(config_manager_t*);
 const char *config_manager_get_qmenu_name(config_manager_t*);
 const char *config_manager_get_qmenubar_name(config_manager_t*);
 const char *config_manager_get_qpushbutton_name(config_manager_t*);

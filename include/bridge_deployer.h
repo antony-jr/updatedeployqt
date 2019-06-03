@@ -5,15 +5,13 @@
 #include <deploy_info.h>
 
 typedef struct {
-	char *deploy_dir;
 	downloader_t *downloader;
 	config_manager_t *manager;
 	deploy_info_t *info;
 } bridge_deployer_t;
 
-bridge_deployer_t *bridge_deployer_create(const char *,
+bridge_deployer_t *bridge_deployer_create(config_manager_t*,
 		                          downloader_t*,
-					  config_manager_t*,
 					  deploy_info_t*);
 void bridge_deployer_destroy(bridge_deployer_t*);
 

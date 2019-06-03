@@ -20,14 +20,20 @@ static int handle_manual_update_check_json_object(const char *name , json_value 
 		printl(info , "QMenu object name(%s) is given , 'Check for Update' option will be appended" , 
 		       value->u.string.ptr);
 		obj->booleans[CONFIG_MANAGER_QMENU_GIVEN] = true;
+		obj->qmenu_name = calloc(1 ,sizeof(*(obj->qmenu_name)) * value->u.string.length);
+		strncpy(obj->qmenu_name , value->u.string.ptr , value->u.string.length);
 	}else if(!strcmp(name , "qmenubar-name")){
 		printl(info , "QMenuBar object name(%s) is given , 'Check for Update' QMenu object will be created" , 
 			value->u.string.ptr);
 		obj->booleans[CONFIG_MANAGER_QMENUBAR_GIVEN] = true;
+		obj->qmenubar_name = calloc(1 ,sizeof(*(obj->qmenubar_name)) * value->u.string.length);
+		strncpy(obj->qmenubar_name , value->u.string.ptr , value->u.string.length);
 	}else if(!strcmp(name , "qpushbutton-name")){
 		printl(info , "QPushButton object name(%s) is given , "
 			      "this button will be connected" , value->u.string.ptr);
 		obj->booleans[CONFIG_MANAGER_QPUSHBUTTON_GIVEN] = true;
+		obj->qpushbutton_name = calloc(1 ,sizeof(*(obj->qpushbutton_name)) * value->u.string.length);
+		strncpy(obj->qpushbutton_name , value->u.string.ptr , value->u.string.length);
 	}else{
 		return -1;
 	}
@@ -201,6 +207,10 @@ config_manager_t *config_manager_create(const char *config){
 		return NULL;
 	}
 	strcpy(obj->config_file , config);
+
+	/* clear the boolean string. */	
+	memset(obj->booleans , 0 , sizeof(obj->booleans));
+	
 	return obj;
 }
 
@@ -282,6 +292,13 @@ const char *config_manager_get_boolean_string(config_manager_t *obj){
 		return NULL;
 	}
 	return obj->booleans;
+}
+
+const char *config_manager_get_bridge_name(config_manager_t *obj){
+	if(!obj){
+		return NULL;
+	}
+	return obj->bridge_name;
 }
 
 const char *config_manager_get_qmenu_name(config_manager_t *obj){

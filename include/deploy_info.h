@@ -14,6 +14,7 @@ void deploy_info_destroy(deploy_info_t*);
 
 int deploy_info_gather(deploy_info_t*);
 
+const char *deploy_info_directory(deploy_info_t*);
 const char *deploy_info_system_library_directory(deploy_info_t*);
 const char *deploy_info_library_directory(deploy_info_t*);
 const char *deploy_info_plugins_directory(deploy_info_t*);

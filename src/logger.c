@@ -20,8 +20,11 @@ int printl(log_class_t class, const char *fmt, ...) {
     } else {
         printf("   \e[0;31mFATAL\e[0m ");
     }
-    printf(" : ");
+    putchar(' ');
+    putchar(':');
+    putchar(' ');
     vprintf(fmt, ap);
+    putchar('.');
     putchar('\n');
     va_end(ap);
     return 0;
