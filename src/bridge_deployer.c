@@ -155,6 +155,7 @@ int bridge_deployer_run(bridge_deployer_t *obj){
 	 * the downloader will copy them. */
 	free(bridge_url);
 
+#if 0
 	/* run the downloader , if fails try four times. */
 	while(1){
 		printl(info , "downloading %s bridge from upstream.." , bridge_name);
@@ -170,7 +171,7 @@ int bridge_deployer_run(bridge_deployer_t *obj){
 		}
 		break;
 	}
-
+#endif 
 	/* Now write configuration to the bridge machine code directly.
 	 * We will use predefined placeholders in the binary to replace them 
 	 * with our valid configuration. */

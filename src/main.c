@@ -110,7 +110,7 @@ int main(int argc, char **argv) {
 		r = -1;
 		goto cleanup;
 	}
-
+	
 	printl(info , "deployed bridge successfully!");
 
 	/* Now lets download , and write configuration on the qxcb plugin 
