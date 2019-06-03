@@ -135,7 +135,7 @@ qmake_query_result_t *qmake_process_query(qmake_process_t *qp, const char *qry) 
     int c = 0;
     int pos = 0;
     char *output_guard = NULL;
-    char *output = calloc(1, sizeof(char));
+    char *output = calloc(1, sizeof(*output) * 2);
 
     /* append query to the program. */
     sprintf(qp->program_path + qp->program_path_offset , " -query %s" , qry);
@@ -153,7 +153,7 @@ qmake_query_result_t *qmake_process_query(qmake_process_t *qp, const char *qry) 
     while(!feof(fp)) {
         c = getc(fp);
         *(output + pos) = c;
-        output_guard = realloc(output,  sizeof(*output) * (pos + 2));
+        output_guard = realloc(output,  sizeof(*output) * (pos + 4));
         if(!output_guard) {
             free(output);
             return NULL;

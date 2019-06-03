@@ -86,7 +86,19 @@ void bridge_deployer_destroy(bridge_deployer_t *obj){
 	if(!obj){
 		return;
 	}
+	
+	if(obj->bridge_path){
+		free(obj->bridge_path);
+	}
 	free(obj);
+}
+
+const char *bridge_deployer_get_bridge_path(bridge_deployer_t *obj){
+	if(!obj ||
+	   !obj->bridge_path){
+		return NULL;
+	}
+	return obj->bridge_path;
 }
 
 int bridge_deployer_run(bridge_deployer_t *obj){
@@ -133,6 +145,7 @@ int bridge_deployer_run(bridge_deployer_t *obj){
 	/* Determine the path to save and url. */
 	sprintf(bridge_path , "./%s/lib%sBridge.so" , plugins_dir , bridge_name);
 	sprintf(bridge_url , url_template , bridge_name);
+	
 
 	/* Now download the files and save it. */
 	downloader_set_url(obj->downloader , bridge_url);
@@ -168,7 +181,12 @@ int bridge_deployer_run(bridge_deployer_t *obj){
 		free(bridge_path);
 		return -1;
 	}
-	free(bridge_path); /* We don't need it anymore. */
+
+	/* Save bridge path for later use. */
+	if(obj->bridge_path){
+		free(obj->bridge_path);
+	}
+	obj->bridge_path = bridge_path;
 
 	/* First lets write the boolean_string into the binary. */
 	if(!config_manager_get_boolean_string(obj->manager)){

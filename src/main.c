@@ -5,6 +5,7 @@
 #include <args_parser.h>
 #include <deploy_info.h>
 #include <bridge_deployer.h>
+#include <injector.h>
 #include <logger.h>
 
 static void print_header();
@@ -21,6 +22,7 @@ int main(int argc, char **argv) {
 	downloader_t *downloader = NULL;
 	config_manager_t *cmanager = NULL;
 	bridge_deployer_t *bdeployer = NULL;
+	injector_t *injector = NULL;
 	args_parser_t *ap = args_parser_create(argc,argv,
 			                       print_header , print_help);
 
@@ -49,7 +51,7 @@ int main(int argc, char **argv) {
 	/* get config file path and deploy directory path */
 	const char *config = args_parser_get_config_file_path(ap);
 	const char *deploy_dir = args_parser_get_deploy_dir_path(ap);
-
+	const char *qmake_path = args_parser_get_qmake(ap);
 
 	/* construct configuration manager from the config file.
 	 * If config file path is not given then it is assumed to be './updatedeployqt.json'.
@@ -113,7 +115,18 @@ int main(int argc, char **argv) {
 
 	/* Now lets download , and write configuration on the qxcb plugin 
 	 * in the plugins directory. */
+	if(!(injector = injector_create(qmake_path , bdeployer))){
+		r = -1;
+		goto cleanup;
+	}
 
+	if(injector_run(injector) < 0){
+		printl(fatal , "qt plugin injection failed");
+		r = -1;
+		goto cleanup;
+	}
+
+	printl(info , "qt plugin injections was successful");
 
 cleanup:
 	print_conclusion(r);
@@ -122,6 +135,7 @@ cleanup:
 	config_manager_destroy(cmanager);
 	downloader_destroy(downloader);
 	bridge_deployer_destroy(bdeployer);
+	injector_destroy(injector);
 	if(rbuf){
 		free(rbuf);
 	}
@@ -190,4 +204,5 @@ static void print_help(char *program_name){
     printf("    -g,--generate-config  create configuration file interactively.\n");
     printf("    -q,--quiet            do not print anything to stdout.\n");
     printf("    -v,--version          show version and exit.\n");
+    printf("    -p,--qmake            use this qmake to query about qt installation.\n");
 }

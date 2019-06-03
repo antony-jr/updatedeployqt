@@ -34,6 +34,9 @@ void args_parser_destroy(args_parser_t *obj){
 		return;
 	}
 
+	if(obj->qmake){
+		free(obj->qmake);
+	}
 	if(obj->config){
 		free(obj->config);
 	}
@@ -118,7 +121,49 @@ int args_parser_run(args_parser_t *obj){
 				     strlen(config_file)) + 1);
 	    strcpy(obj->config , config_file);
 	    continue; 
-       } else {
+       } else if(strstr(*argv, "-p") ||
+                  strstr(*argv, "--qmake")) {
+	    if(obj->qmake){
+		    printl(fatal , "conflicting qmake programs");
+		    return ARGS_PARSER_FATAL_ERROR;
+	    }
+            if((*argv)[0] == '-' && (*argv)[1] == 'p'){
+		if((*argv)[2] == '\0'){ /* The next arg has the string.*/
+			if(*(++argv)){
+				obj->qmake = calloc(1 , 
+						    (sizeof(*(obj->qmake))
+						    * strlen(*argv)) + 1);
+				strcpy(obj->qmake , *argv);
+				continue;
+			}
+			printl(fatal , "expected the configuration file");
+			return ARGS_PARSER_FATAL_ERROR;
+		}
+      		char *qmake = *argv + 2; /* go past -p */
+		obj->qmake = calloc(1 , (sizeof(*(obj->qmake)) * 
+				     strlen(qmake)) + 1);
+		strcpy(obj->qmake , qmake);
+		continue;
+            }
+	    char *qmake = *argv + 7; /* move past --qmake*/
+	    if(!(*qmake)){
+		    /* next arg has the config file. */
+	   	    if(*(++argv)){
+			obj->qmake = calloc(1 , 
+						(sizeof(*(obj->qmake))
+						    * strlen(*argv)) + 1);
+				strcpy(obj->qmake , *argv);
+				continue;
+			}
+			printl(fatal , "expected the configuration file");
+			return ARGS_PARSER_FATAL_ERROR;
+
+	    }
+	    obj->qmake= calloc(1 , (sizeof(*(obj->qmake)) * 
+				     strlen(qmake)) + 1);
+	    strcpy(obj->qmake , qmake);
+	    continue; 
+       }else {
 	    /* If its not an option then lets take it as the
 	     * deploy directory. 
 	     * IP comes here twice , we raise a error. */
@@ -139,6 +184,13 @@ int args_parser_run(args_parser_t *obj){
 	    return ARGS_PARSER_FATAL_ERROR;
     }
     return 0;	
+}
+
+const char *args_parser_get_qmake(args_parser_t *obj){
+	if(!obj || !obj->qmake){
+		return NULL;
+	}
+	return obj->qmake;
 }
 
 const char *args_parser_get_config_file_path(args_parser_t *obj){
