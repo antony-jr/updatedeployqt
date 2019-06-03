@@ -29,10 +29,10 @@ add_executable(updatedeployqt src/qmake_process.c
 			      src/config_manager.c
 			      src/deploy_info.c
 			      src/bridge_deployer.c
+			      src/library_deployer.c
 			      src/injector.c
 			      src/md5.c
 			      src/downloader.c
-			      src/config_writer.c
 			      src/main.c 
 			      include/logger.h 
 			      include/qmake_process.h
@@ -41,11 +41,11 @@ add_executable(updatedeployqt src/qmake_process.c
 			      include/deploy_info.h
 			      include/injector.h
 			      include/bridge_deployer.h
+			      include/library_deployer.h
 			      include/args_parser.h
 			      include/config_manager.h
 			      include/json.h
-			      include/downloader.h
-			      include/config_writer.h)
+			      include/downloader.h)
 
 target_link_libraries(updatedeployqt PUBLIC curl m)
 target_include_directories(updatedeployqt PUBLIC . include)

@@ -6,6 +6,7 @@
 #include <deploy_info.h>
 #include <bridge_deployer.h>
 #include <injector.h>
+#include <library_deployer.h>
 #include <logger.h>
 
 static void print_header();
@@ -22,6 +23,7 @@ int main(int argc, char **argv) {
 	downloader_t *downloader = NULL;
 	config_manager_t *cmanager = NULL;
 	bridge_deployer_t *bdeployer = NULL;
+	library_deployer_t *ldeployer = NULL;
 	injector_t *injector = NULL;
 	args_parser_t *ap = args_parser_create(argc,argv,
 			                       print_header , print_help);
@@ -129,7 +131,20 @@ int main(int argc, char **argv) {
 	printl(info , "qt plugin injections was successful");
 
 
-	/* Lets check if the user deployed qt network module */
+	/* finally deploy required shared libraries */
+	printl(info , "deploying required shared libraries..");
+	if(!(ldeployer = library_deployer_create(qmake_path , dinfo))){
+		r = -1;
+		goto cleanup;
+	}
+
+	if(library_deployer_run(ldeployer) < 0){
+		printl(fatal , "cannot deploy required libraries");
+		r = -1;
+		goto cleanup;
+	}
+
+	r = 1; /* Mark that this deploy is successful. */
 
 cleanup:
 	print_conclusion(r);
@@ -138,6 +153,7 @@ cleanup:
 	config_manager_destroy(cmanager);
 	downloader_destroy(downloader);
 	bridge_deployer_destroy(bdeployer);
+	library_deployer_destroy(ldeployer);
 	injector_destroy(injector);
 	if(rbuf){
 		free(rbuf);

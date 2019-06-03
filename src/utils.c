@@ -1,3 +1,4 @@
+#include <logger.h>
 #include <utils.h>
 #include <stdio.h>
 #include <string.h>
@@ -48,4 +49,32 @@ int find_offset_and_write(FILE *fp, const char *to_find, const char *replace, si
     }
     free(buffer);
     return r;
+}
+
+int copy_file(const char *dest , const char *src){
+	if(!dest || !src){
+		return -1;
+	}
+	printl(info , "copy file from %s to %s" , src , dest);
+	FILE *dest_fp;
+        FILE *src_fp;
+        int c = 0;
+
+        if(!(src_fp=fopen(src,"rb"))) {
+                printl(fatal, "cannot open '%s' for reading", src);
+                return -1;
+        }
+
+        if(!(dest_fp=fopen(dest, "wb"))) {
+                printl(fatal, "cannot open '%s' for writing", dest);
+                fclose(src_fp);
+		return -1;
+	}
+
+        while((c = getc(src_fp)) != EOF) {
+                putc(c, dest_fp);
+        }
+        fclose(src_fp);
+        fclose(dest_fp);
+	return 0;
 }
