@@ -88,6 +88,16 @@ The **deploy directory** is a directory which you have finalized and packaged al
 and plugins along with your executable and resources. In case you are packaging **AppImages** then 
 the **deploy directory** is your **AppDir**. 
 
+# Projects Using This
+
+Feel free to open a **PR** to include your project too. Here are some known projects which use this to deploy
+auto update feature for their Qt application.
+
+* [Blue Glow](https://github.com/antony-jr/blue-glow) - You can use this as an example.
+
+* [QTalarm-AppImage](https://github.com/antony-jr/QTalarm-AppImage) - You can also use this as an example.
+
+
 
 # License
 
