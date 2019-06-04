@@ -179,7 +179,7 @@ cleanup:
 	if(rbuf){
 		free(rbuf);
 	}
-	return r;
+	return (r==1) ? 0 : r; /* if success then return 0 , else return the error code. */
 }
 
 static void print_conclusion(int result){
