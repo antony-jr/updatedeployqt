@@ -1,123 +1,72 @@
-# updatedeployqt
+# Update Deploy Qt ![issues](https://img.shields.io/github/issues/TheFutureShell/updatedeployqt.svg?style=flat-square) ![forks](https://img.shields.io/github/forks/TheFutureShell/updatedeployqt.svg?style=flat-square) ![stars](https://img.shields.io/github/stars/TheFutureShell/updatedeployqt.svg?style=flat-square) ![license](https://img.shields.io/github/license/TheFutureShell/updatedeployqt.svg?style=flat-square)
 
-updatedeployqt is a command line tool which can deploy auto update to any Qt based Application regardless of 
-the programming language using the Qt plugin mechanism. This tool was specifically built to provide 
-auto update feature for Qt Applications packaged with AppImages , Qt Installer Framework and Qt Applications
-simply released through Github releases.
 
-These mode of update is refered as so called bridges , for now only AppImageUpdater bridge is stable and usable.
+
+<p align=center>
+<img src="https://raw.githubusercontent.com/TheFutureShell/artwork/master/updatedeployqt/release.png" width="300px" height=auto />
+</p>
+
+
+**updatedeployqt** is a command line tool which can **deploy** auto update feature or *integrate the updater into
+your* QApplication with **zero code change.** This does **not depend** on the programming language you used to 
+build the **Application** , *as long as it uses Qt framework , this feature can be deployed using this tool.*
+
+
 
 **IMPORTANT**: This software is in alpha stage. Remember with great power comes great responsibility.
 
+
 # Installation
 
-You don't need to compile this from source , simply download the latest AppImage from releases and mark it
+### Linux 
+
+You don't need to compile this from source , simply download the latest AppImage from releases and make it
 executable and you are ready to go. This works in travis-ci and other such services too. So you can deploy
-update directly on travis-ci.
+update directly on continuous integration services.
+
 
 ```
- $ wget -O updatedeployqt-continuous-x86_64.AppImage "https://git.io/fj4CH"
- $ chmod +x updatedeployqt-continuous-x86_64.AppImage
- $ ./updatedeployqt-continuous-x86_64.AppImage
+ $ wget "https://github.com/TheFutureShell/updatedeployqt/releases/download/continuous/updatedeployqt-x86_64.AppImage"
+ $ chmod +x updatedeployqt-x86_64.AppImage
+ $ ./updatedeployqt-x86_64.AppImage
 ```
+
+### Windows
+
+Not yet implemented
+
+### MacOSX
+
+Not yet implemented
 
 
 # Usage
 
-For now this only covers the usage for deploying auto updater for AppImages.
+The program looks for **updatedeployqt.json** in the current working directory or in the path 
+given through ```-c,--config``` argument. This configuration file can be interactively generated
+by passing ```-g,--generate-config``` argument to the program.
 
-``` 
-   updatedeployqt version 1-alpha (commit none) , built on Tue May 21 15:42:15 2019
-   copyright (C) 2019 the future shell laboratory , antony jr.
+This configuration file will decide on how the updater should work , such as auto update without
+the users concern or integrate the updater into a menu bar item.
 
-   Usage: ./updatedeployqt [BRIDGE] [PATH to libqxcb.so] [OPTIONS]
-
-   BRIDGES: 
-      AppImage         deploy auto updater for AppImages
-      QtInstaller      deploy auto updater for Qt Installer packaged Application
-      GithubReleases   deploy auto updater for Qt Application released via Github
-
-   OPTIONS: 
-      -q,--qmake       path to qmake binary to use to query qt version.
-     -qv,--qt-version  assume this as the qt version.
-      -l,--lib-path    path where libraries are deployed.
-```
-
-
-### AppImages
-
-First step is to bundle the required shared libraries and qt plugins using [linuxdeployqt](https://github.com/probonopd/linuxdeployqt) or [linuxdeploy](https://github.com/linuxdeploy/linuxdeploy) in the **AppDir**.
-You **SHOULD** not package it as AppImage yet. 
-
-Now execute this command with respect to your **AppDir**. You have to find the qxcb plugin typically located in your **AppDir** at
-**'AppDir/usr/plugins/platforms/libqxcb.so'**
-
-```
-    $ ./updatedeployqt-continuous-x86_64.AppImage AppImage AppDir/usr/plugins/platforms/libqxcb.so
-```
-
-**Thats it**.
-
-Now **package it as an AppImage**. You can use [linuxdeployqt](https://github.com/probonopd/linuxdeployqt) , [linuxdeploy](https://github.com/linuxdeploy/linuxdeploy) or [appimagetool](https://github.com/AppImage/AppImageKit). Make sure you have 
-included the **update information** as given in the **AppImage specification** , Without the update information embeded in 
-the AppImage , the update will not work.
-
-**IMPORTANT** : Also you have to make sure that you deploy **libQt5Network.so.5** which should be deployed automatically by
-[linuxdeploy](https://github.com/linuxdeploy/linuxdeploy) in most cases. You can use ```--lib-path``` command argument to check for the network module.
-
-
-**NOTE** : The Qt version number is very important to deploy the correct plugins , the program automatically detects the qt version 
-by querying **qmake** installed in the system. You can however can specify any Qt version using ```--qt-version``` program
-argument.
-
-
-The whole process can follow this template , I highly recommend you use [linuxdeploy](https://github.com/linuxdeploy/linuxdeploy) to do this.
+After generating the configuration file , you can simply run the below command to deploy your 
+updater.
 
 
 ```
-    $ wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
-    $ wget https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage  
-    $ chmod +x linuxdeploy*.AppImage
-    $ ./linuxdeploy-x86_64.AppImage --appdir=AppDir -d AppDir/YourApp.desktop -p qt
-    $ wget -O updatedeployqt-continuous-x86_64.AppImage "https://git.io/fj4CH"
-    $ chmod +x updatedeployqt-continuous-x86_64.AppImage
-    $ ./updatedeployqt-continuous-x86_64.AppImage AppImage AppDir/usr/plugins/platforms/libqxcb.so
-    $ export UPDATE_INFORMATION="gh-releases-zsync|git_username|git_repo|continuous|YourApp*-x86_64.AppImage.zsync"
-    $ ./linuxdeploy-x86_64.AppImage --appdir=appdir --output appimage
-    $ # Thats it , now you can use YourApp-x86_64.AppImage 
+ $ updatedeployqt [PATH TO DEPLOY DIRECTORY]
 ```
 
-**Here is an [example repo](https://github.com/antony-jr/QTalarm-AppImage) which does this in travis-ci and uploads it to releases.**
-
-#### Repacking AppImages with Auto Update
-
-With this tool you can also repack AppImages with auto update after packaging it , down below is an example on how to
-do it. **However** you should know the **Qt major and minor version used in the AppImage.** 
-
-We are repacking **qTox** AppImage along with our Auto updater.
+or if **updatedeployqt.json** is not in the current working directory.
 
 ```
-   $ wget \
-     "https://github.com/qTox/qTox/releases/download/v1.16.3/qTox-v1.16.3.x86_64.AppImage"
-   $ chmod +x qTox-v1.16.3.x86_64.AppImage
-   $ ./qTox-v1.16.3.x86_64.AppImage --appimage-extract # get the contents
-   $ # We know qTox v1.16.3 uses Qt version 5.7.3 or so.
-   $ # Download updatedeployqt 
-   $ wget -O updatedeployqt-continuous-x86_64.AppImage "https://git.io/fj4CH"
-   $ chmod +x updatedeployqt-continuous-x86_64.AppImage
-   $ ./updatedeployqt-continuous-x86_64.AppImage AppImage \
-                                                 squashfs-root/local/plugins/platforms/libqxcb.so \
-                                                 -qv "5.7.0"
-   $ wget  \
-     "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
-   $ chmod +x appimagetool-x86_64.AppImage
-   $ # qTox does not provide any update info , so for demo we created a kind of proxy for that.
-   $ ./appimagetool-x86_64.AppImage \
-                        -u "gh-releases-zsync|antony-jr|qTox|continuous|qtox-x86_64.AppImage.zsync" \
-                        --no-appstream squashfs-root
-   $ # Down below is the new modified AppImage with no source change.
-   $ ./qTox-x86_64.AppImage # The update should start in a second. 
+ $ updatedeployqt -c[PATH TO CONFIG FILE] [PATH TO DEPLOY DIRECTORY]
 ```
+
+
+The **deploy directory** is a directory which you have finalized and packaged all required libraries 
+and plugins along with your executable and resources. In case you are packaging **AppImages** then 
+the **deploy directory** is your **AppDir**. 
 
 
 # License
