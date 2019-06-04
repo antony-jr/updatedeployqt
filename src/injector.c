@@ -71,7 +71,7 @@ int injector_run(injector_t *obj){
 	printl(info , "downloading modified qxcb plugin for qt version %s" , qt_version);
 
 	if(qt_version[0] != '5' ||
-	   (('0' - qt_version[2]) < 6 && qt_version[3] == '.')){
+	   ((qt_version[2] - '0') < 6 && qt_version[3] == '.')){
 		printl(fatal , "your qt version is yet not supported , aborting.");
 		qmake_process_destroy(qmake);
 		return -1;

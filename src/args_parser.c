@@ -77,7 +77,7 @@ int args_parser_run(args_parser_t *obj){
        }else if(!strcmp(*argv, "-g") ||
                   !strcmp(*argv, "--generate-config")) {
 	      obj->flags |= 2; /* Set the second last bit. */
-	      continue; 	
+	      return ARGS_PARSER_CLEAN_EXIT;	
        }
        else if(strstr(*argv, "-c") ||
                   strstr(*argv, "--config")) {

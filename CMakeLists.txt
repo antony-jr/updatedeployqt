@@ -27,6 +27,7 @@ add_executable(updatedeployqt src/qmake_process.c
 			      src/utils.c
 			      src/args_parser.c
 			      src/config_manager.c
+			      src/config_generator.c
 			      src/deploy_info.c
 			      src/bridge_deployer.c
 			      src/library_deployer.c
@@ -44,6 +45,7 @@ add_executable(updatedeployqt src/qmake_process.c
 			      include/library_deployer.h
 			      include/args_parser.h
 			      include/config_manager.h
+			      include/config_generator.h
 			      include/json.h
 			      include/downloader.h)
 

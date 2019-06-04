@@ -7,6 +7,7 @@
 #include <bridge_deployer.h>
 #include <injector.h>
 #include <library_deployer.h>
+#include <config_generator.h>
 #include <logger.h>
 
 static void print_header();
@@ -19,9 +20,13 @@ int main(int argc, char **argv) {
 	int r = 0;
 	int arg_parse_ret = 0;
 	char *rbuf = NULL;
+	const char *config = NULL;
+	const char *deploy_dir = NULL;
+	const char *qmake_path = NULL;
 	deploy_info_t *dinfo = NULL;
 	downloader_t *downloader = NULL;
 	config_manager_t *cmanager = NULL;
+	config_generator_t *generator = NULL;
 	bridge_deployer_t *bdeployer = NULL;
 	library_deployer_t *ldeployer = NULL;
 	injector_t *injector = NULL;
@@ -40,7 +45,22 @@ int main(int argc, char **argv) {
 	if(arg_parse_ret == ARGS_PARSER_NO_ARGS ||
 	   arg_parse_ret == ARGS_PARSER_CLEAN_EXIT){
 		/* cleanup and exit with no errors if no args is given or -v
-		 * is given */
+		 * is given or -g is given.*/
+
+		if(args_parser_is_generate_config(ap)){
+			/* If -g is given then generate and exit peacefully */
+			putchar('\n'); /* newline after the header */
+			if(!(generator = config_generator_create())){
+				r = -1;
+				goto cleanup;
+			}
+			if(config_generator_run(generator) < 0){
+				printl(fatal , "there was an error generating configuration file");
+				r = -1;
+				goto cleanup;
+			}
+		}
+
 		r = 0;
 		goto cleanup;
 	}
@@ -51,9 +71,9 @@ int main(int argc, char **argv) {
 	}
 
 	/* get config file path and deploy directory path */
-	const char *config = args_parser_get_config_file_path(ap);
-	const char *deploy_dir = args_parser_get_deploy_dir_path(ap);
-	const char *qmake_path = args_parser_get_qmake(ap);
+	config = args_parser_get_config_file_path(ap);
+	deploy_dir = args_parser_get_deploy_dir_path(ap);
+	qmake_path = args_parser_get_qmake(ap);
 
 	/* construct configuration manager from the config file.
 	 * If config file path is not given then it is assumed to be './updatedeployqt.json'.
@@ -151,6 +171,7 @@ cleanup:
 	deploy_info_destroy(dinfo);
 	args_parser_destroy(ap);
 	config_manager_destroy(cmanager);
+	config_generator_destroy(generator);
 	downloader_destroy(downloader);
 	bridge_deployer_destroy(bdeployer);
 	library_deployer_destroy(ldeployer);
