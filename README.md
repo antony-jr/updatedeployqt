@@ -13,7 +13,25 @@ build the **Application** , *as long as it uses Qt framework , this feature can 
 
 
 
-**IMPORTANT**: This software is in alpha stage. Remember with great power comes great responsibility.
+**IMPORTANT**: *This software is in alpha stage.* **Remember with great power comes great responsibility.**
+
+
+
+# Features
+
+* *Deploy Native Auto Updater with* **zero code change** - *This done using Qt Plugin Injector*.
+
+* **Programming Language Independent** - The reason you want to use this solution.
+
+* *Supports AppImages , Qt Installer Framework and Applications released through Github.*
+
+* *Light-weight* - Using this only takes about **800 KiB**.
+
+* *Cross-platform* - Yet to implement but its going to be.
+
+* *Respects General Data Protection Regulation* - unlike electron-updater.
+
+* *Drink the Qt Kool-aid* - In a positive way.
 
 
 # Installation
@@ -24,9 +42,11 @@ You don't need to compile this from source , simply download the latest AppImage
 executable and you are ready to go. This works in travis-ci and other such services too. So you can deploy
 update directly on continuous integration services.
 
+You can download the latest AppImage from this [url](https://github.com/TheFutureShell/updatedeployqt/releases/download/continuous/updatedeployqt-x86_64.AppImage). This *url* will be constant and will never change and thus
+you can use this *url* to download the AppImage using wget whenever you want to use it.
 
 ```
- $ wget "https://github.com/TheFutureShell/updatedeployqt/releases/download/continuous/updatedeployqt-x86_64.AppImage"
+ $ wget -O updatedeployqt-x86_64.AppImage "https://git.io/fj4CH"
  $ chmod +x updatedeployqt-x86_64.AppImage
  $ ./updatedeployqt-x86_64.AppImage
 ```
@@ -74,7 +94,7 @@ the **deploy directory** is your **AppDir**.
 BSD 3-Clause License
 
 Copyright (c) 2019, Future Shell Laboratory.   
-All rights reserved.
+All Rights Reserved.
 
 
 
