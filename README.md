@@ -42,7 +42,7 @@ You don't need to compile this from source , simply download the latest AppImage
 executable and you are ready to go. This works in travis-ci and other such services too. So you can deploy
 update directly on continuous integration services.
 
-You can download the latest AppImage from this [url](https://github.com/TheFutureShell/updatedeployqt/releases/download/continuous/updatedeployqt-x86_64.AppImage). This *url* will be constant and will never change and thus
+You can download the latest AppImage from this [url](https://github.com/TheFutureShell/updatedeployqt/releases/download/continuous/updatedeployqt-continuous-x86_64.AppImage). This *url* will be constant and will never change and thus
 you can use this *url* to download the AppImage using wget whenever you want to use it.
 
 ```
