@@ -17,19 +17,19 @@ static int handle_manual_update_check_json_object(const char *name , json_value 
 	}
 
 	if(!strcmp(name , "qmenu-name")){
-		printl(info , "QMenu object name(%s) is given , 'Check for Update' option will be appended" , 
+		printl(info , "QMenu object name(%s) is given, 'Check for Update' option will be appended" , 
 		       value->u.string.ptr);
 		obj->booleans[CONFIG_MANAGER_QMENU_GIVEN] = true;
 		obj->qmenu_name = calloc(1 ,sizeof(*(obj->qmenu_name)) * value->u.string.length);
 		strncpy(obj->qmenu_name , value->u.string.ptr , value->u.string.length);
 	}else if(!strcmp(name , "qmenubar-name")){
-		printl(info , "QMenuBar object name(%s) is given , 'Check for Update' QMenu object will be created" , 
+		printl(info , "QMenuBar object name(%s) is given, 'Check for Update' QMenu object will be created" , 
 			value->u.string.ptr);
 		obj->booleans[CONFIG_MANAGER_QMENUBAR_GIVEN] = true;
 		obj->qmenubar_name = calloc(1 ,sizeof(*(obj->qmenubar_name)) * value->u.string.length);
 		strncpy(obj->qmenubar_name , value->u.string.ptr , value->u.string.length);
 	}else if(!strcmp(name , "qpushbutton-name")){
-		printl(info , "QPushButton object name(%s) is given , "
+		printl(info , "QPushButton object name(%s) is given, "
 			      "this button will be connected" , value->u.string.ptr);
 		obj->booleans[CONFIG_MANAGER_QPUSHBUTTON_GIVEN] = true;
 		obj->qpushbutton_name = calloc(1 ,sizeof(*(obj->qpushbutton_name)) * value->u.string.length);
@@ -153,7 +153,7 @@ static int parse_json_object(json_value *value , int (*handle_json_value)(const 
 		if(handle_json_value(value->u.object.values[x].name , 
 				  value->u.object.values[x].value ,
 				  obj) < 0){
-			printl(fatal , "updatedeployqt.json:%d:%d:%s: unknown error in configuration file , please fix it" , 
+			printl(fatal , "updatedeployqt.json:%d:%d:%s: unknown error in configuration file, please fix it" , 
 				(value->u.object.values[x].value)->line ,
 				(value->u.object.values[x].value)->col,
 				value->u.object.values[x].name);
@@ -279,7 +279,7 @@ int config_manager_run(config_manager_t *obj){
 	fclose(fp); 
 
 	if(parse(contents , pos , obj) < 0){
-		printl(fatal , "cannot parse %s , giving up" , obj->config_file);
+		printl(fatal , "cannot parse %s, giving up" , obj->config_file);
 		free(contents);
 		return -1;
 	}
