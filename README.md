@@ -73,7 +73,7 @@ the **deploy directory** is your **AppDir**.
 
 BSD 3-Clause License
 
-Copyright (c) 2019, Future Shell Laboratory.
+Copyright (c) 2019, Future Shell Laboratory.   
 All rights reserved.
 
 
