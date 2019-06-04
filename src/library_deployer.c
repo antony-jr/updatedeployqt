@@ -35,7 +35,6 @@ void library_deployer_destroy(library_deployer_t *obj){
 }
 
 int library_deployer_run(library_deployer_t *obj){
-	int qt_network_dep = 0;
 	char *p = NULL;
 	char *p2 = NULL;
 	const char *qt_lib_install_path = NULL;
@@ -73,21 +72,15 @@ int library_deployer_run(library_deployer_t *obj){
 			free(p2);
 			goto deploy_openssl_libs;
 		}
-		qt_network_dep = 1;
-
 		qmake_process_destroy(qmake);
 		free(p);
 		free(p2);
 	}else{
 		printl(info , "qt network module already deployed");
-		qt_network_dep = 1;
 		free(p);
 	}
 
 deploy_openssl_libs:
-	if(!qt_network_dep){
-		printl(info , "will search for libQt5Network.so.5 in system library directory");
-	}
 	printl(info , "searching for openssl libraries in host system library path");
 	
 	dr = opendir(deploy_info_system_library_directory(obj->info));
@@ -96,9 +89,8 @@ deploy_openssl_libs:
 		    return -1;
 	} 
 	while ((de = readdir(dr)) != NULL){
-		if((!strstr(de->d_name , "libcrypt") &&
-		   !strstr(de->d_name , "libssl") ) ||  
-		   (strcmp(de->d_name , "libQt5Network.so.5") || qt_network_dep)){
+		if(!strstr(de->d_name , "libcrypt") &&
+		   !strstr(de->d_name , "libssl")){
 			continue;
 		}
 		
