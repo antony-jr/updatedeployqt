@@ -21,13 +21,9 @@ static char *get_bridge_source(const char *bridge_name){
 		return NULL;
 	}
 	
-	sprintf(p , "lib%s.so" , bridge_name);
+	sprintf(p , "lib%sBridge.so" , bridge_name);
 
 	r = get_bundled_data_file(p);
-	if(!r){
-		free(p);
-		return NULL;
-	}
 	free(p);
 	return r;
 }
