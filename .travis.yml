@@ -20,10 +20,9 @@ script:
   - cd ..
   - mkdir appdir/data
   - cd appdir/data
-  - bash scripts/download_xcb_plugins.sh
-  - bash scripts/download_bridges.sh
-  - cd ..
-  - cd ..
+  - bash ../../scripts/download_xcb_plugins.sh
+  - bash ../../scripts/download_bridges.sh
+  - cd ../../
   - wget -q http://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
   - chmod +x linuxdeploy-x86_64.AppImage
   - export VERSION="continuous"
