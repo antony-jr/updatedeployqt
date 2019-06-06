@@ -105,7 +105,7 @@ qt_version_info_t *qt_version_info_create(const char *qtcore_path){
 	printl(info , "qt version tag: %s" , obj->version_str);
 
 	if(*(obj->version_str + tomove) - '0' < 6 &&
-	   *(obj->version_str + tomove + 1) != '\0'){
+	   *(obj->version_str + tomove + 1) == '\0'){
 		qt_version_info_destroy(obj);
 		printl(fatal , "only qt version 5.6.0 and above are supported");
 		return NULL;
