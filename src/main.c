@@ -226,6 +226,13 @@ static void print_header(){
 	   "none"
 #endif
     );
+    printf("Qt update bridges git-commit %s.\n" ,
+#ifdef QT_UPD_BRIDGES_COMMIT_STR
+	   QT_UPD_BRIDGES_COMMIT_STR
+#else
+	   "none"
+#endif
+    );
 
     putchar('\n');
 }

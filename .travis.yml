@@ -12,9 +12,14 @@ script:
   - export IC=$(git rev-parse --short HEAD)
   - cd ..
   - rm -rf QtPluginInjector
+  - git clone https://github.com/TheFutureShell/QtUpdateBridges
+  - cd QtUpdateBridges
+  - export UBC=$(git rev-parse --short HEAD)
+  - cd ..
+  - rm -rf QtUpdateBridges
   - mkdir build
   - cd build
-  - cmake .. -DQT_PLUGIN_INJECTOR_COMMIT_STR=$IC -DCMAKE_INSTALL_PREFIX=/usr -DGIT_COMMIT_STR=$(git rev-parse --short HEAD)
+  - cmake .. -DQT_UPD_BRIDGES_COMMIT_STR=$UBC -DQT_PLUGIN_INJECTOR_COMMIT_STR=$IC -DCMAKE_INSTALL_PREFIX=/usr -DGIT_COMMIT_STR=$(git rev-parse --short HEAD)
   - make -j$(nproc)
   - make install DESTDIR=../appdir
   - cd ..
