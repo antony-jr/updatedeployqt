@@ -25,7 +25,7 @@ typedef struct {
 	char *qmenu_name;
 	char *qmenubar_name;
 	char *qpushbutton_name;
-	char *qaction_to_remove;
+	char *qaction_to_override;
 	int   interval; /* in miliseconds */
 
 	char booleans[10];
@@ -42,8 +42,7 @@ typedef struct {
 	 * booleans[7] - If set then QPushButton QObject name is available.
 	 * booleans[8] - If set then interval for startup auto update check and cyclic auto update check 
 	 *               is available.
-	 * booleans[9] - If set then remove QAction from the given QMenu or QMenuBar object using the 
-	 *               given regex string 'qaction-to-remove'.
+	 * booleans[9] - If set then override QAction from the given QMenu or QMenuBar.
 	 */
 } config_manager_t;
 
@@ -61,7 +60,7 @@ const char *config_manager_get_bridge_name(config_manager_t*);
 const char *config_manager_get_qmenu_name(config_manager_t*);
 const char *config_manager_get_qmenubar_name(config_manager_t*);
 const char *config_manager_get_qpushbutton_name(config_manager_t*);
-const char *config_manager_get_qaction_to_remove(config_manager_t*);
+const char *config_manager_get_qaction_to_override(config_manager_t*);
 const char *config_manager_get_qt_version(config_manager_t*);
 
 /* returns time in miliseconds. */

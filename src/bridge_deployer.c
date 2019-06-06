@@ -70,8 +70,7 @@ int bridge_deployer_run(bridge_deployer_t *obj){
 		return -1;
 	}
 	FILE *fp = NULL;
-	int tries = 0,
-	    iter = 0,
+	int iter = 0,
 	    r = 0;
 	char *buffer = NULL;
 	const char *p = NULL;
@@ -97,7 +96,7 @@ int bridge_deployer_run(bridge_deployer_t *obj){
 	   strcmp(bridge_name , "GHReleases")){
 		/* All possible bridge name mismatches. */
 		free(bridge_path);
-		printl(fatal , "unknown updater bridge , please fix it");
+		printl(fatal , "unknown updater bridge, please fix it");
 		return -1;
 	}
 
@@ -215,7 +214,7 @@ qpushbutton_name_write:
 
 qaction_to_remove_write:
 	/* Now write the text of the QAction to remove if found on runtime, if available. */
-	if(!(p = config_manager_get_qaction_to_remove(obj->manager))){
+	if(!(p = config_manager_get_qaction_to_override(obj->manager))){
 		goto interval_write;		
 	}
 	
@@ -226,7 +225,7 @@ qaction_to_remove_write:
 
 	r = find_offset_and_write(fp , qaction_to_remove_placeholder , buffer , CONFIG_MANAGER_OBJECT_STRING_LEN + 1);
 	if(r <= 0){
-		printl(fatal , "failed to write QAction text to remove to binary");
+		printl(fatal , "failed to write QAction object name to override to binary");
 		free(buffer);
 		fclose(fp);
 		return -1;

@@ -42,12 +42,12 @@ static int handle_manual_update_check_json_object(const char *name , json_value 
 		obj->booleans[CONFIG_MANAGER_QPUSHBUTTON_GIVEN] = true;
 		obj->qpushbutton_name = calloc(1 ,sizeof(*(obj->qpushbutton_name)) * value->u.string.length);
 		strncpy(obj->qpushbutton_name , value->u.string.ptr , value->u.string.length);
-	}else if(!strcmp(name , "qaction-to-remove")){
-		printl(info , "QAction to remove is given, any QAction with text maching to %s will be removed" , 
+	}else if(!strcmp(name , "qaction-to-override")){
+		printl(info , "QAction to override is given" , 
 			value->u.string.ptr);
 		obj->booleans[CONFIG_MANAGER_QACTION_TO_REMOVE_GIVEN] = true;
-		obj->qaction_to_remove = calloc(1 ,sizeof(*(obj->qaction_to_remove)) * value->u.string.length);
-		strncpy(obj->qaction_to_remove , value->u.string.ptr , value->u.string.length);
+		obj->qaction_to_override = calloc(1 ,sizeof(*(obj->qaction_to_override)) * value->u.string.length);
+		strncpy(obj->qaction_to_override , value->u.string.ptr , value->u.string.length);
 	}
 	else{
 		return -1;
@@ -279,8 +279,8 @@ void config_manager_destroy(config_manager_t *obj){
 	if(obj->qpushbutton_name){
 		free(obj->qpushbutton_name);
 	}
-	if(obj->qaction_to_remove){
-		free(obj->qaction_to_remove);
+	if(obj->qaction_to_override){
+		free(obj->qaction_to_override);
 	}
 	free(obj);
 }
@@ -367,11 +367,11 @@ const char *config_manager_get_qpushbutton_name(config_manager_t *obj){
 	return obj->qpushbutton_name;
 }
 
-const char *config_manager_get_qaction_to_remove(config_manager_t *obj){
+const char *config_manager_get_qaction_to_override(config_manager_t *obj){
 	if(!obj){
 		return NULL;
 	}
-	return obj->qaction_to_remove;
+	return obj->qaction_to_override;
 }
 
 const char *config_manager_get_qt_version(config_manager_t *obj){
