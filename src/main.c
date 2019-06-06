@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <config_manager.h>
-#include <downloader.h>
 #include <args_parser.h>
 #include <deploy_info.h>
 #include <bridge_deployer.h>
@@ -24,7 +23,6 @@ int main(int argc, char **argv) {
 	const char *deploy_dir = NULL;
 	const char *qmake_path = NULL;
 	deploy_info_t *dinfo = NULL;
-	downloader_t *downloader = NULL;
 	config_manager_t *cmanager = NULL;
 	config_generator_t *generator = NULL;
 	bridge_deployer_t *bdeployer = NULL;
@@ -95,14 +93,6 @@ int main(int argc, char **argv) {
 		goto cleanup;
 	}
 
-	/* allocate downloader. */
-	if(!(downloader = downloader_create())){
-		/* cleanup and exit with errors */
-		printl(fatal , "cannot allocate space for downloader");
-		r = -1;
-		goto cleanup;
-	}
-
 	/* Now lets get the deploy information before we download anything. */
 	if(!(dinfo = deploy_info_create(deploy_dir))){
 		r = -1;
@@ -123,7 +113,7 @@ int main(int argc, char **argv) {
 
 	/* Now lets download , and write configuration on the required bridge 
 	 * in the plugins directory. */
-	if(!(bdeployer = bridge_deployer_create(cmanager , downloader , dinfo))){
+	if(!(bdeployer = bridge_deployer_create(cmanager , dinfo))){
 		r = -1;
 		goto cleanup;
 	}
@@ -172,7 +162,6 @@ cleanup:
 	args_parser_destroy(ap);
 	config_manager_destroy(cmanager);
 	config_generator_destroy(generator);
-	downloader_destroy(downloader);
 	bridge_deployer_destroy(bdeployer);
 	library_deployer_destroy(ldeployer);
 	injector_destroy(injector);
@@ -230,6 +219,13 @@ static void print_header(){
            __TIMESTAMP__
           );
     printf("Copyright (C) 2019 The Future Shell Laboratory.\n");
+    printf("Qt plugin injector git-commit %s.\n" ,
+#ifdef QT_PLUGIN_INJECTOR_COMMIT_STR
+	   QT_PLUGIN_INJECTOR_COMMIT_STR
+#else
+	   "none");
+#endif
+
 }
 
 /* 

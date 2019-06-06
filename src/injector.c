@@ -16,6 +16,20 @@ const char *slot_to_call_placeholder = "f80b03178d4080a30c14e71bbbe6e31b";
 /* internal configuration */
 const char *slot_to_call = "initAutoUpdate(void)";
 
+
+static char *get_qxcb_source(const char *qtversion){
+	char *r = NULL;
+	char *p = calloc(1 , sizeof(*p) * (strlen(qtversion) + 50));
+	if(!p){
+		return NULL;
+	}
+	sprintf(p , "libqxcb-%s.so" , qtversion);
+	r = get_bundled_data_file(p);
+	free(p);
+	return r;
+}
+
+
 injector_t *injector_create(const char *qmake , bridge_deployer_t *bridge){
 	injector_t *obj = NULL;
 	if(!bridge){
@@ -45,8 +59,6 @@ int injector_run(injector_t *obj){
 	    r = 0;
 	char *p = NULL;
 	const char *qt_version = NULL;
-	const char *url_template = "https://github.com/TheFutureShell/QtPluginInjector/"
-		                   "releases/download/continuous-Qt%s/libqxcb.so";
 	qt_version_info_t *qt_ver_info = NULL;
 	if(!obj ||
 	   !deploy_info_qxcb_plugin_path(obj->bridge->info)){
@@ -71,7 +83,7 @@ int injector_run(injector_t *obj){
 	}
 
 	/* Now lets download the modified qxcb plugin from upstream. */
-	printl(info , "downloading modified qxcb plugin for qt version %s" , qt_version);
+	printl(info , "copying modified qxcb plugin for qt version %s" , qt_version);
 
 	if(qt_version[0] != '5' ||
 	   ((qt_version[2] - '0') < 6 && qt_version[3] == '.')){
@@ -94,29 +106,17 @@ int injector_run(injector_t *obj){
 	   p[5] = '\0';
 	}
 
-	p = calloc( 1, sizeof(*p) * (strlen(url_template) + strlen(qt_version) + 20));
-	sprintf(p , url_template , qt_version);
-
-	downloader_set_url(obj->bridge->downloader , p);
+	p = get_qxcb_source(qt_version);
+	if(copy_file(deploy_info_qxcb_plugin_path(obj->bridge->info) , p) < 0){
+		printl(fatal , "copy failed");
+		free(p);
+		qt_version_info_destroy(qt_ver_info);
+		return -1;
+	}
 	free(p);
 	qt_version_info_destroy(qt_ver_info);
 
-	downloader_set_destination(obj->bridge->downloader , deploy_info_qxcb_plugin_path(obj->bridge->info));
-
-	/* download the file */
-	while(1){
-		printl(info , "downloading qt plugin injector from upstream..");
-		if(downloader_exec(obj->bridge->downloader) < 0){
-			if(tries > 4){
-				printl(info , "downloading qt plugin injector from upstream failed");
-				return -1;
-			}
-			printl(info , "download failed for unknown reason , retrying..");
-			++tries;
-			continue;
-		}
-		break;
-	}
+	printl(info , "successfully copied qxcb plugin");
 
 	/* Now write the configuration into the qxcb plugin. */
 	/* Lets first open the file. */

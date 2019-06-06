@@ -1,6 +1,5 @@
 #include <bridge_deployer.h>
 #include <config_manager.h>
-#include <downloader.h>
 #include <deploy_info.h>
 #include <logger.h>
 #include <utils.h>
@@ -15,12 +14,29 @@ const char *qmenubar_name_placeholder = "bfa40825ef36e05bbc2c561595829a92";
 const char *qpushbutton_name_placeholder = "930b29debfb164461b39342d59e2565c";
 const char *boolean_string_placeholder = "4c6160c2d6bfeba1";
 
+static char *get_bridge_source(const char *bridge_name){
+	char *r = NULL;
+	char *p = calloc(1 , sizeof(*p) * (strlen(bridge_name) + 10));
+	if(!p){
+		return NULL;
+	}
+	
+	sprintf(p , "lib%s.so" , bridge_name);
+
+	r = get_bundled_data_file(p);
+	if(!r){
+		free(p);
+		return NULL;
+	}
+	free(p);
+	return r;
+}
+
 bridge_deployer_t *bridge_deployer_create(config_manager_t *manager,
-					  downloader_t *downloader,
 					  deploy_info_t *info){
 	bridge_deployer_t *obj = NULL;
-	if(!manager || !downloader || !info){
-		printl(fatal , "invalid configuration manager or downloader or deploy information");
+	if(!manager || !info){
+		printl(fatal , "invalid configuration manager or deploy information");
 		return NULL;
 	}
 
@@ -29,7 +45,6 @@ bridge_deployer_t *bridge_deployer_create(config_manager_t *manager,
 		return NULL;
 	}
 	obj->manager = manager;
-	obj->downloader = downloader;
 	obj->info = info;
 	return obj;
 }
@@ -63,22 +78,18 @@ int bridge_deployer_run(bridge_deployer_t *obj){
 	    r = 0;
 	char *buffer = NULL;
 	const char *p = NULL;
-	const char *url_template = "https://github.com/TheFutureShell/QtUpdateBridges/"
-		                   "releases/download/continuous/lib%sBridge.so";
 	const char *plugins_dir = deploy_info_plugins_directory(obj->info);
 	const char *bridge_name = config_manager_get_bridge_name(obj->manager);
 	char *bridge_path = NULL;
-	char *bridge_url = NULL;
+	char *bridge_src = NULL;
 	if(!plugins_dir || 
 	   !bridge_name){
 		return -1;
 	}
 	
 	bridge_path = calloc(1 ,sizeof(*bridge_path) * (strlen(plugins_dir) + 100));
-	bridge_url = calloc(1 , sizeof(*bridge_url) * (strlen(url_template) + 100));
 
-	if(!bridge_path ||
-	   !bridge_url){
+	if(!bridge_path){
 		printl(fatal , "not enough memory");
 		return -1;
 	}
@@ -89,40 +100,24 @@ int bridge_deployer_run(bridge_deployer_t *obj){
 	   strcmp(bridge_name , "GHReleases")){
 		/* All possible bridge name mismatches. */
 		free(bridge_path);
-		free(bridge_url);
 		printl(fatal , "unknown updater bridge , please fix it");
 		return -1;
 	}
 
-	/* Determine the path to save and url. */
+	/* Determine the destination to save and source to copy from. */
 	sprintf(bridge_path , "./%s/lib%sBridge.so" , plugins_dir , bridge_name);
-	sprintf(bridge_url , url_template , bridge_name);
-	
+	bridge_src = get_bridge_source(bridge_name);
 
-	/* Now download the files and save it. */
-	downloader_set_url(obj->downloader , bridge_url);
-	downloader_set_destination(obj->downloader , bridge_path);
-
-	/* We don't need the bridge_url , since 
-	 * the downloader will copy them. */
-	free(bridge_url);
-
-	/* run the downloader , if fails try four times. */
-	while(1){
-		printl(info , "downloading %s bridge from upstream.." , bridge_name);
-		if(downloader_exec(obj->downloader) < 0){
-			if(tries > 4){
-				printl(info , "downloading bridge from upstream failed");
-				free(bridge_path);
-				return -1;
-			}
-			printl(info , "download failed for unknown reason , retrying..");
-			++tries;
-			continue;
-		}
-		break;
+	printl(info , "copying required bridge.");
+	if(copy_file(bridge_path , bridge_src) < 0){
+		free(bridge_path);
+		free(bridge_src);
+		printl(fatal , "failed to copy required bridge.");
+		return -1;
 	}
-	
+	free(bridge_src);
+	printl(info , "successfully copied %s bridge to deploy directory" , bridge_name);	
+
 	/* Now write configuration to the bridge machine code directly.
 	 * We will use predefined placeholders in the binary to replace them 
 	 * with our valid configuration. */

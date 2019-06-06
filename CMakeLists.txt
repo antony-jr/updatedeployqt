@@ -21,6 +21,10 @@ if(GIT_COMMIT_STR)
 	add_definitions(-DGIT_COMMIT_STR="${GIT_COMMIT_STR}")
 endif()
 
+if(QT_PLUGIN_INJECTOR_COMMIT_STR)
+	add_definitions(-DQT_PLUGIN_INJECTOR_COMMIT_STR="${QT_PLUGIN_INJECTOR_COMMIT_STR}")
+endif()
+
 add_executable(updatedeployqt src/logger.c
 	                      src/qt_version_info.c
 			      src/json.c
@@ -33,7 +37,6 @@ add_executable(updatedeployqt src/logger.c
 			      src/library_deployer.c
 			      src/injector.c
 			      src/md5.c
-			      src/downloader.c
 			      src/main.c 
 			      include/logger.h 
 			      include/md5.h
@@ -46,10 +49,9 @@ add_executable(updatedeployqt src/logger.c
 			      include/args_parser.h
 			      include/config_manager.h
 			      include/config_generator.h
-			      include/json.h
-			      include/downloader.h)
+			      include/json.h)
 
-target_link_libraries(updatedeployqt PUBLIC curl m)
+target_link_libraries(updatedeployqt PUBLIC m)
 target_include_directories(updatedeployqt PUBLIC . include)
 
 install(

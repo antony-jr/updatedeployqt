@@ -1,8 +1,36 @@
 #include <logger.h>
 #include <utils.h>
+#include <unistd.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+
+char *get_bundled_data_file(const char *file){
+	char *p = NULL;
+	char *dir = calloc(1 , sizeof(*dir) * 100);	
+	if(!dir){
+		return NULL;
+	}
+	
+	if (readlink("/proc/self/exe", dir , 100) < 0) {
+                free(dir);    
+		return NULL;
+	}
+	
+	if((p = strstr(dir , "/usr/"))){
+		*p = '\0';
+	}
+
+	p = calloc(1 , sizeof(*p) * (strlen(dir) + 10 + strlen(file)));
+	if(!file){
+		sprintf(p , "%s/data/" , dir);
+	}else{
+		sprintf(p , "%s/data/%s" , dir , file);
+	}
+	free(dir);
+	return p;	
+}
+
 
 int read_bytes(FILE *fp , char **buffer , size_t n){
 	long int pos = 0;

@@ -7,11 +7,22 @@ before_install:
   - sudo apt-get update -qq
 
 script:
+  - git clone https://github.com/TheFutureShell/QtPluginInjector
+  - cd QtPluginInjector
+  - export IC=$(git rev-parse --short HEAD)
+  - cd ..
+  - rm -rf QtPluginInjector
   - mkdir build
   - cd build
-  - cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DGIT_COMMIT_STR=$(git rev-parse --short HEAD)
+  - cmake .. -DQT_PLUGIN_INJECTOR_COMMIT_STR=$IC -DCMAKE_INSTALL_PREFIX=/usr -DGIT_COMMIT_STR=$(git rev-parse --short HEAD)
   - make -j$(nproc)
   - make install DESTDIR=../appdir
+  - cd ..
+  - mkdir appdir/data
+  - cd appdir/data
+  - bash scripts/download_xcb_plugins.sh
+  - bash scripts/download_bridges.sh
+  - cd ..
   - cd ..
   - wget -q http://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
   - chmod +x linuxdeploy-x86_64.AppImage
