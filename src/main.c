@@ -227,6 +227,7 @@ static void print_header(){
 #endif
     );
 
+    putchar('\n');
 }
 
 /* 

@@ -124,7 +124,7 @@ static int handle_basic_info(const char *name , json_value *value , config_manag
 				*(obj->qtversion + 3) = '.';
 				*(obj->qtversion + 4) = '0';
 			}
-		}else{
+		}else if(strlen(obj->qtversion) > 5){
 			if(isnum(*(obj->qtversion + 3)) &&
 			   (*(obj->qtversion + 4) == '.' || *(obj->qtversion + 4) == '\0')){
 				strcpy(obj->qtversion , "5.10.0"); 

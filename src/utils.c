@@ -83,7 +83,6 @@ int copy_file(const char *dest , const char *src){
 	if(!dest || !src){
 		return -1;
 	}
-	printl(info , "copy file from %s to %s" , src , dest);
 	FILE *dest_fp;
         FILE *src_fp;
         int c = 0;
