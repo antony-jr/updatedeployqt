@@ -223,8 +223,9 @@ static void print_header(){
 #ifdef QT_PLUGIN_INJECTOR_COMMIT_STR
 	   QT_PLUGIN_INJECTOR_COMMIT_STR
 #else
-	   "none");
+	   "none"
 #endif
+    );
 
 }
 
