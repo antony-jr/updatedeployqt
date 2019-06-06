@@ -101,6 +101,25 @@ static int handle_basic_info(const char *name , json_value *value , config_manag
 			return 0;
 		}
 		strncpy(obj->qtversion , value->u.string.ptr , value->u.string.length);
+
+		if(strlen(obj->qtversion) < 3){
+			free(obj->qtversion);
+			printl(warning , "invalid qt version given, please fix that.");
+			return 0;
+		}
+
+		if(strlen(obj->qtversion) < 4){
+			obj->qtversion = realloc(obj->qtversion , sizeof(*(obj->qtversion)) * (value->u.string.length + 5));
+		
+			if(*(obj->qtversion + 3) != '.' ||
+			   *(obj->qtversion + 3) != '\0'){
+				*(obj->qtversion + 4) = '.';
+				*(obj->qtversion + 5) = '0';
+			}else{
+				*(obj->qtversion + 3) = '.';
+				*(obj->qtversion + 4) = '0';
+			}
+		}
 	}else if(!strcmp(name , "bridge")){
 		if(value->type != json_string){
 			printl(fatal , "updatedeployqt.json:%d:%d: expected a string" , 

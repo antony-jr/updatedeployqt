@@ -4,7 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-static int read_bytes(FILE *fp , char **buffer , size_t n){
+int read_bytes(FILE *fp , char **buffer , size_t n){
 	long int pos = 0;
 	int r = 0;
 	pos = ftell(fp); /* Make it as if one byte is only read. */

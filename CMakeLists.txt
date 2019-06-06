@@ -21,8 +21,8 @@ if(GIT_COMMIT_STR)
 	add_definitions(-DGIT_COMMIT_STR="${GIT_COMMIT_STR}")
 endif()
 
-add_executable(updatedeployqt src/qmake_process.c
-			      src/logger.c
+add_executable(updatedeployqt src/logger.c
+	                      src/qt_version_info.c
 			      src/json.c
 			      src/utils.c
 			      src/args_parser.c
@@ -36,9 +36,9 @@ add_executable(updatedeployqt src/qmake_process.c
 			      src/downloader.c
 			      src/main.c 
 			      include/logger.h 
-			      include/qmake_process.h
 			      include/md5.h
 			      include/utils.h
+			      include/qt_version_info.h
 			      include/deploy_info.h
 			      include/injector.h
 			      include/bridge_deployer.h

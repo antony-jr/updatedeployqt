@@ -2,5 +2,6 @@
 #define UTILS_H_INCLUDED
 #include <stdio.h>
 int copy_file(const char *,const char*);
+int read_bytes(FILE * , char ** , size_t);
 int find_offset_and_write(FILE *, const char *, const char *, size_t);
 #endif /* UTILS_H_INCLUDED */

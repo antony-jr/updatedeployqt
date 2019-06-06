@@ -145,7 +145,7 @@ int config_generator_run(config_generator_t *obj){
 	obj->ver = get_string();
 
 
-	printf("\nEnter the Qt version to target: ");
+	printf("\nEnter the Qt version to target(optional): ");
 	obj->qtver = get_string();
 
 	printf("\nFrom the below options , select the bridge you want to use:\n");

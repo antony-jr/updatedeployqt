@@ -1,6 +1,5 @@
 #include <library_deployer.h>
 #include <deploy_info.h>
-#include <qmake_process.h>
 #include <logger.h>
 #include <utils.h>
 #include <stdio.h>
@@ -40,7 +39,6 @@ int library_deployer_run(library_deployer_t *obj){
 	const char *qt_lib_install_path = NULL;
 	struct dirent *de;
 	DIR *dr = NULL;
-	qmake_process_t *qmake = NULL;
 	
 	if(!obj ||
 	   !deploy_info_library_directory(obj->info) ||
@@ -54,27 +52,8 @@ int library_deployer_run(library_deployer_t *obj){
 
 	if(access(p , F_OK)){
 		printl(warning , "qt network module does not exist in your deploy directory");
-		printl(info , "trying to deploy it");
-		if(!(qmake = qmake_process_create(!obj->qmake ? "qmake" : obj->qmake))){
-			printl(fatal , "cannot determine the qt install path , giving up");
-			free(p);
-			goto deploy_openssl_libs;
-		}
-		qt_lib_install_path =  
-			qmake_query_result_value(qmake_process_query(qmake , "QT_INSTALL_LIBS"));
-		printl(info , "qt libraries install path: %s" , qt_lib_install_path);
-		p2 = calloc(1 , sizeof(*p2) * (strlen(qt_lib_install_path) + 100));
-		sprintf(p2 , "%s/libQt5Network.so.5" , qt_lib_install_path);
-
-		if(copy_file(p , p2) < 0){
-			printl(warning , "cannot copy qt network module , giving up");
-			free(p);
-			free(p2);
-			goto deploy_openssl_libs;
-		}
-		qmake_process_destroy(qmake);
-		free(p);
-		free(p2);
+		printl(warning , "this might cause trouble in later stages , please deploy it to deploy directory");
+		goto deploy_openssl_libs;
 	}else{
 		printl(info , "qt network module already deployed");
 		free(p);

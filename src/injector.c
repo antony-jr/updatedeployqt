@@ -1,7 +1,7 @@
 #include <injector.h>
 #include <bridge_deployer.h>
 #include <logger.h>
-#include <qmake_process.h>
+#include <qt_version_info.h>
 #include <md5.h>
 #include <utils.h>
 #include <stdio.h>
@@ -47,7 +47,7 @@ int injector_run(injector_t *obj){
 	const char *qt_version = NULL;
 	const char *url_template = "https://github.com/TheFutureShell/QtPluginInjector/"
 		                   "releases/download/continuous-Qt%s/libqxcb.so";
-	qmake_process_t *qmake = NULL;
+	qt_version_info_t *qt_ver_info = NULL;
 	if(!obj ||
 	   !deploy_info_qxcb_plugin_path(obj->bridge->info)){
 		return -1;
@@ -56,15 +56,18 @@ int injector_run(injector_t *obj){
 	/* Get Qt version that is targeted. */
 	if(!(qt_version = config_manager_get_qt_version(obj->bridge->manager))){
 		/* Qt version is not given in updatedeployqt.json , 
-		 * lets try guessing the Qt version from the qmake installed 
-		 * in the system or the one given by the user. */
+		 * lets get it from libQt5Core in the deploy dir */
 
-		if(!(qmake = qmake_process_create(!obj->qmake ? "qmake" : obj->qmake))){
-			printl(fatal , "cannot determine the qt version");
+		char *path = calloc(1 , sizeof(*path) * (strlen(deploy_info_library_directory(obj->bridge->info)) + 20));
+		sprintf(path , "%s/libQt5Core.so.5" , deploy_info_library_directory(obj->bridge->info));
+
+		qt_ver_info = qt_version_info_create(path);
+		if(!qt_ver_info){
+			printl(fatal , "cannot determine qt version to target");
 			return -1;
 		}
-		qt_version =  qmake_query_result_value(qmake_process_query(qmake , "QT_VERSION"));
-		printl(info , "targeting qt version: %s" , qt_version);
+
+		qt_version = qt_version_info_get_version(qt_ver_info);
 	}
 
 	/* Now lets download the modified qxcb plugin from upstream. */
@@ -73,7 +76,7 @@ int injector_run(injector_t *obj){
 	if(qt_version[0] != '5' ||
 	   ((qt_version[2] - '0') < 6 && qt_version[3] == '.')){
 		printl(fatal , "your qt version is yet not supported , aborting.");
-		qmake_process_destroy(qmake);
+		qt_version_info_destroy(qt_ver_info);
 		return -1;
 	}
 
@@ -96,7 +99,7 @@ int injector_run(injector_t *obj){
 
 	downloader_set_url(obj->bridge->downloader , p);
 	free(p);
-	qmake_process_destroy(qmake);
+	qt_version_info_destroy(qt_ver_info);
 
 	downloader_set_destination(obj->bridge->downloader , deploy_info_qxcb_plugin_path(obj->bridge->info));
 
