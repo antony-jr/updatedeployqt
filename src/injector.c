@@ -54,8 +54,7 @@ void injector_destroy(injector_t *obj){
 
 int injector_run(injector_t *obj){
 	FILE *fp = NULL;
-	int tries = 0,
-	    r = 0;
+	int r = 0;
 	char *p = NULL;
 	const char *qt_version = NULL;
 	qt_version_info_t *qt_ver_info = NULL;
