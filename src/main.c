@@ -208,7 +208,7 @@ static char *get_config_file(const char *path){
  * @returns: nothing.
 */
 static void print_header(){
-	printf("updatedeployqt git-commit %s , built on %s\n",
+	printf("updatedeployqt git-commit %s, built on %s\n",
 #ifdef GIT_COMMIT_STR
            GIT_COMMIT_STR
 #else
