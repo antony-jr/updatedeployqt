@@ -104,6 +104,7 @@ static int handle_basic_info(const char *name , json_value *value , config_manag
 
 		if(strlen(obj->qtversion) < 3){
 			free(obj->qtversion);
+			obj->qtversion = NULL;
 			printl(warning , "invalid qt version given, please fix that.");
 			return 0;
 		}
@@ -111,7 +112,7 @@ static int handle_basic_info(const char *name , json_value *value , config_manag
 		if(strlen(obj->qtversion) < 4){
 			obj->qtversion = realloc(obj->qtversion , sizeof(*(obj->qtversion)) * (value->u.string.length + 5));
 		
-			if(*(obj->qtversion + 3) != '.' ||
+			if(*(obj->qtversion + 3) != '.' &&
 			   *(obj->qtversion + 3) != '\0'){
 				*(obj->qtversion + 4) = '.';
 				*(obj->qtversion + 5) = '0';
