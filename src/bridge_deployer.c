@@ -140,7 +140,7 @@ int bridge_deployer_run(bridge_deployer_t *obj){
 
 	p = config_manager_get_boolean_string(obj->manager);
 	buffer = calloc(1 , sizeof(*buffer) * 17); /* TODO: change this once the boolean string has constant length. */	
-	for(iter = 0; iter < CONFIG_MANAGER_BOOLEAN_STRING_LEN ;++iter){
+	for(iter = 0; iter <= CONFIG_MANAGER_BOOLEAN_STRING_LEN ;++iter){
 		buffer[iter] = *p++;
 	}
 
