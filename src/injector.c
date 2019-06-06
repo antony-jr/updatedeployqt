@@ -30,7 +30,7 @@ static char *get_qxcb_source(const char *qtversion){
 }
 
 
-injector_t *injector_create(const char *qmake , bridge_deployer_t *bridge){
+injector_t *injector_create(bridge_deployer_t *bridge){
 	injector_t *obj = NULL;
 	if(!bridge){
 		printl(fatal , "invalid bridge deployer or args parser given , internal error");
@@ -41,7 +41,6 @@ injector_t *injector_create(const char *qmake , bridge_deployer_t *bridge){
 		printl(fatal , "not enough memory");
 		return NULL;
 	}
-	obj->qmake = qmake;
 	obj->bridge = bridge;
 	return obj;
 }

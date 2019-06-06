@@ -8,8 +8,7 @@
 #include <unistd.h>
 #include <dirent.h>
 
-library_deployer_t *library_deployer_create(const char *qmake ,
-		                            deploy_info_t *info){
+library_deployer_t *library_deployer_create(deploy_info_t *info){
 	library_deployer_t *obj = NULL;
 	if(!info){
 		printl(fatal , "invalid deploy information given");
@@ -21,7 +20,6 @@ library_deployer_t *library_deployer_create(const char *qmake ,
 		return NULL;
 	}
 	
-	obj->qmake = qmake;
 	obj->info = info;
 	return obj;
 }
@@ -35,8 +33,6 @@ void library_deployer_destroy(library_deployer_t *obj){
 
 int library_deployer_run(library_deployer_t *obj){
 	char *p = NULL;
-	char *p2 = NULL;
-	const char *qt_lib_install_path = NULL;
 	struct dirent *de;
 	DIR *dr = NULL;
 	

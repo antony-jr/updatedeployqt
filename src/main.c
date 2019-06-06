@@ -21,7 +21,6 @@ int main(int argc, char **argv) {
 	char *rbuf = NULL;
 	const char *config = NULL;
 	const char *deploy_dir = NULL;
-	const char *qmake_path = NULL;
 	deploy_info_t *dinfo = NULL;
 	config_manager_t *cmanager = NULL;
 	config_generator_t *generator = NULL;
@@ -71,7 +70,7 @@ int main(int argc, char **argv) {
 	/* get config file path and deploy directory path */
 	config = args_parser_get_config_file_path(ap);
 	deploy_dir = args_parser_get_deploy_dir_path(ap);
-	qmake_path = args_parser_get_qmake(ap);
+
 
 	/* construct configuration manager from the config file.
 	 * If config file path is not given then it is assumed to be './updatedeployqt.json'.
@@ -127,7 +126,7 @@ int main(int argc, char **argv) {
 
 	/* Now lets download , and write configuration on the qxcb plugin 
 	 * in the plugins directory. */
-	if(!(injector = injector_create(qmake_path , bdeployer))){
+	if(!(injector = injector_create(bdeployer))){
 		r = -1;
 		goto cleanup;
 	}
@@ -143,7 +142,7 @@ int main(int argc, char **argv) {
 
 	/* finally deploy required shared libraries */
 	printl(info , "deploying required shared libraries..");
-	if(!(ldeployer = library_deployer_create(qmake_path , dinfo))){
+	if(!(ldeployer = library_deployer_create(dinfo))){
 		r = -1;
 		goto cleanup;
 	}
@@ -249,5 +248,4 @@ static void print_help(char *program_name){
     printf("    -g,--generate-config  create configuration file interactively.\n");
     printf("    -q,--quiet            do not print anything to stdout.\n");
     printf("    -v,--version          show version and exit.\n");
-    printf("    -p,--qmake            use this qmake to query about qt installation.\n");
 }

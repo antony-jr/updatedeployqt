@@ -11,7 +11,6 @@ typedef struct {
 	int args_len;
 	short flags;
 	char **args;
-	char *qmake;
 	char *config;
 	char *deploy_dir;
 	void (*header)();
@@ -24,7 +23,6 @@ void args_parser_destroy(args_parser_t*);
 int args_parser_run(args_parser_t*);
 const char *args_parser_get_config_file_path(args_parser_t*);
 const char *args_parser_get_deploy_dir_path(args_parser_t*);
-const char *args_parser_get_qmake(args_parser_t*);
 short args_parser_is_generate_config(args_parser_t*);
 short args_parser_is_quiet(args_parser_t*);
 
