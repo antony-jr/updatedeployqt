@@ -12,6 +12,7 @@ const char *interval_placeholder = "75629552e6e8286442676be60e7da67d";
 const char *qmenu_name_placeholder = "871abbc22416bb25429594dec45caf1f";
 const char *qmenubar_name_placeholder = "bfa40825ef36e05bbc2c561595829a92";
 const char *qpushbutton_name_placeholder = "930b29debfb164461b39342d59e2565c";
+const char *qaction_to_remove_placeholder = "0b6e66aa3800ad9cad94fe41984b9b56";
 const char *boolean_string_placeholder = "4c6160c2d6bfeba1";
 
 static char *get_bridge_source(const char *bridge_name){
@@ -195,7 +196,7 @@ qmenu_name_write:
 qpushbutton_name_write:
 	/* Now write QPushButton QObject name if available. */
 	if(!(p = config_manager_get_qpushbutton_name(obj->manager))){
-		goto interval_write;		
+		goto qaction_to_remove_write;	
 	}
 	
 	buffer = calloc(1 , sizeof(*buffer) * (CONFIG_MANAGER_OBJECT_STRING_LEN + 1));
@@ -206,6 +207,26 @@ qpushbutton_name_write:
 	r = find_offset_and_write(fp , qmenu_name_placeholder , buffer , CONFIG_MANAGER_OBJECT_STRING_LEN + 1);
 	if(r <= 0){
 		printl(fatal , "failed to write QMenu QObject name to binary");
+		free(buffer);
+		fclose(fp);
+		return -1;
+	}
+	free(buffer);
+
+qaction_to_remove_write:
+	/* Now write the text of the QAction to remove if found on runtime, if available. */
+	if(!(p = config_manager_get_qaction_to_remove(obj->manager))){
+		goto interval_write;		
+	}
+	
+	buffer = calloc(1 , sizeof(*buffer) * (CONFIG_MANAGER_OBJECT_STRING_LEN + 1));
+	for(iter = 0; iter < CONFIG_MANAGER_OBJECT_STRING_LEN ; ++iter){
+		buffer[iter] = *p++;
+	}
+
+	r = find_offset_and_write(fp , qaction_to_remove_placeholder , buffer , CONFIG_MANAGER_OBJECT_STRING_LEN + 1);
+	if(r <= 0){
+		printl(fatal , "failed to write QAction text to remove to binary");
 		free(buffer);
 		fclose(fp);
 		return -1;
