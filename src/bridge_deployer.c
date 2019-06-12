@@ -101,7 +101,7 @@ int bridge_deployer_run(bridge_deployer_t *obj){
 	}
 
 	/* Determine the destination to save and source to copy from. */
-	sprintf(bridge_path , "./%s/lib%sBridge.so" , plugins_dir , bridge_name);
+	sprintf(bridge_path , "%s/lib%sBridge.so" , plugins_dir , bridge_name);
 	bridge_src = get_bridge_source(bridge_name);
 
 	printl(info , "copying required bridge.");
