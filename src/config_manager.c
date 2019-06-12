@@ -43,8 +43,8 @@ static int handle_manual_update_check_json_object(const char *name , json_value 
 		obj->qpushbutton_name = calloc(1 ,sizeof(*(obj->qpushbutton_name)) * value->u.string.length);
 		strncpy(obj->qpushbutton_name , value->u.string.ptr , value->u.string.length);
 	}else if(!strcmp(name , "qaction-to-override")){
-		printl(info , "QAction to override is given , QAction with text containing %s will be overrided" , 
-			obj->qaction_to_override);
+		printl(info , "QAction to override is given , QAction with text containing '%s' will be overrided" , 
+			value->u.string.ptr);
 		obj->booleans[CONFIG_MANAGER_QACTION_TO_REMOVE_GIVEN] = true;
 		obj->qaction_to_override = calloc(1 ,sizeof(*(obj->qaction_to_override)) * value->u.string.length);
 		strncpy(obj->qaction_to_override , value->u.string.ptr , value->u.string.length);

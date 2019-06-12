@@ -8,10 +8,12 @@
 #include <string.h>
 #include <ctype.h>
 
-static char *find_qt_tag_and_read(FILE *fp){
+int find_qt_minor_version(FILE *fp){
     const char *pattern = "qt_version_tag_5_";
     const size_t atmost_read = strlen(pattern) + 2;
-    int found = 0;
+    const size_t tomove = strlen(pattern);
+    int minor = 0;
+    int temp = 0;
     char *tag = NULL;
     char *buffer = NULL;
     tag = calloc(1 , sizeof(*tag) * (atmost_read + 2));
@@ -39,7 +41,6 @@ static char *find_qt_tag_and_read(FILE *fp){
 	}
         if(strstr(buffer, pattern)) {
 	    size_t iter = 0;
-	    ++found;
 	    while(iter < atmost_read){
 		    if(!isascii(buffer[iter])){
 			    buffer[iter] = '\0';
@@ -48,24 +49,28 @@ static char *find_qt_tag_and_read(FILE *fp){
 	    }
 	    if(strlen(buffer) > 14){
 		    strcpy(tag , buffer);
+		    if(*(tag + tomove) - '0' > 6 || 
+		       *(tag + tomove + 1) != '\0'){
+			    temp = *(tag + tomove + 1) != '\0' ? 10 :
+				   *(tag + tomove) - '0'; 
+			    
+			    if(temp > minor){
+				    minor = temp;
+			    }
+			    break;
+		    }
 	    }
 	}
     }
 
+    free(tag);
     free(buffer);
-
-    if(found == 0){
-	    free(tag);
-	    tag = NULL;
-    }
-    return tag;
+    return minor;
 }
 
 
 qt_version_info_t *qt_version_info_create(const char *qtcore_path){
 	FILE *fp = NULL;
-	const char *pattern = "qt_version_tag_5_";
-	const size_t tomove = strlen(pattern);
 	qt_version_info_t *obj = NULL;
 	if(!qtcore_path){
 		return NULL;
@@ -94,32 +99,17 @@ qt_version_info_t *qt_version_info_create(const char *qtcore_path){
 		return NULL;
 	}
 
-	if(!(obj->version_str = find_qt_tag_and_read(fp))){
-		printl(fatal , "cannot find qt version tag in Qt5 Core");
-		fclose(fp);
-		qt_version_info_destroy(obj);
-		return NULL;
-	}
+	obj->minor = find_qt_minor_version(fp);
 	fclose(fp);
 
-	printl(info , "qt version tag: %s" , obj->version_str);
-
-	if(*(obj->version_str + tomove) - '0' < 6 &&
-	   *(obj->version_str + tomove + 1) == '\0'){
+	if(!obj->minor){
+		printl(fatal , "unable to find suitable qt version");
+		printl(fatal , "please try explicitly mentioning it in updatedeployqt.json");
 		qt_version_info_destroy(obj);
-		printl(fatal , "only qt version 5.6.0 and above are supported");
 		return NULL;
 	}
-
-	if(*(obj->version_str + tomove + 1) != '\0'){
-		obj->minor = 10;
-	}else{
-		obj->minor = *(obj->version_str + tomove) - '0';
-	}
-
-	free(obj->version_str);
-
-	obj->version_str= calloc(1 , sizeof(*(obj->version_str)) * 10);
+	
+	obj->version_str = calloc(1 , sizeof(*(obj->version_str)) * 10);
 	sprintf(obj->version_str, "5.%d.0" , obj->minor);
 	return obj;
 
