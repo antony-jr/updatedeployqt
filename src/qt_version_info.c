@@ -57,7 +57,6 @@ int find_qt_minor_version(FILE *fp){
 			    if(temp > minor){
 				    minor = temp;
 			    }
-			    break;
 		    }
 	    }
 	}
