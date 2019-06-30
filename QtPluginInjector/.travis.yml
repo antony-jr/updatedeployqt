@@ -1,0 +1,36 @@
+sudo: required
+compiler: gcc
+dist: trusty
+language: cpp
+
+before_install:
+  - sudo apt-get update -qq
+  - sudo bash install_build_utils.sh
+
+jobs:
+  include:
+    - stage: Qt5.6.0
+      os: linux
+      env: JOB="5.6.0"
+      script: "./main.sh"
+    - stage: Qt5.7.0
+      os: linux
+      env: JOB="5.7.0"
+      script: "./main.sh"
+    - stage: Qt5.8.0
+      os: linux
+      env: JOB="5.8.0"
+      script: "./main.sh"
+    - stage: Qt5.9.0
+      os: linux
+      env: JOB="5.9.0"
+      script: "./main.sh"
+    - stage: Qt5.10.0
+      os: linux
+      env: JOB="5.10.0"
+      script: "./main.sh"
+  
+branches:
+  except:
+    - # Do not build tags that we create when we upload to GitHub Releases
+    - /^(?i:continuous)/
