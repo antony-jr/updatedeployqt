@@ -5,10 +5,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <ctype.h>
-
-static int write_string(const char *s , FILE *fp){
-	return fwrite(s , sizeof(*s) , strlen(s) , fp);
-}
+#include <json_builder.h>
 
 static void strlower(char *buffer){
 	while(*buffer){
@@ -146,20 +143,39 @@ void config_generator_destroy(config_generator_t *obj){
 
 int config_generator_run(config_generator_t *obj){
 	int opt = 0;
+	char *buf = NULL;
+	json_serialize_opts options;
+	options.mode = json_serialize_mode_multiline;
+
+	json_value *main_object = json_object_new(0);
+	json_value *auto_update_check_object  = json_object_new(0);
+	json_value *manual_update_check_object = json_object_new(0);
+	json_value *qmenu_json_object = NULL;
+	json_value *qpushbutton_json_object = NULL;
+	json_value *qaction_json_object = NULL;
+
 	if(!obj){
 		return -1;
 	}
 
 	printf("Enter the name for the application(optional): ");
 	obj->name = get_string();
+	if(!is_string_empty(obj->name)){
+		json_object_push(main_object , "name" , json_string_new(obj->name));
+	}
 
 	printf("\nEnter the version for the application(optional): ");
 	obj->ver = get_string();
-
-
+	if(!is_string_empty(obj->ver)){
+		json_object_push(main_object , "version" , json_string_new(obj->ver));
+	}
+	
 	printf("\nEnter the Qt version to target(optional): ");
 	obj->qtver = get_string();
-
+	if(!is_string_empty(obj->qtver)){
+		json_object_push(main_object , "qt-version" , json_string_new(obj->qtver));
+	}
+	
 	printf("\nFrom the below options , select the bridge you want to use:\n");
 	printf("1. AppImageUpdater - Used to deploy updater for Qt Application packaged with AppImage.\n");
 	printf("2. QInstaller      - Used to deploy updater for Qt Installer Framework.\n");
@@ -186,6 +202,10 @@ int config_generator_run(config_generator_t *obj){
 		default:
 			break;
 	}
+	
+	if(!is_string_empty(obj->bridge)){
+		json_object_push(main_object , "bridge" , json_string_new(obj->bridge));	
+	}
 
 	printf("\nSelect the type of update you prefer:\n");
 	printf("1. Auto Update Check Initialization - Automatically check for upates without concern from user.\n");
@@ -208,6 +228,14 @@ int config_generator_run(config_generator_t *obj){
 				obj->interval = NULL;
 			}
 		}
+
+		if(obj->update_check_on_startup){
+			if(obj->interval_given){
+				json_object_push(auto_update_check_object , "interval" , json_string_new(obj->interval));
+			}
+			json_object_push(auto_update_check_object, "startup" , json_boolean_new(1));
+			json_object_push(main_object , "auto-update-check" , auto_update_check_object);	
+		}
 	}else if(opt == 2){
 		printf("\nDo you want to integrate 'Check for Update' option in one of your QMenu Object(Y/n): ");
 		scanf("%s" , obj->option);
@@ -226,6 +254,14 @@ int config_generator_run(config_generator_t *obj){
 			if(is_string_empty(obj->qmenu_text)){
 				obj->qmenu_text_given = 0;
 			}
+
+			qmenu_json_object = json_object_new(0);
+			if(obj->qmenu_qobject_given){
+				json_object_push(qmenu_json_object , "qobject-name" , json_string_new(obj->qmenu_qobject));
+			}
+			if(obj->qmenu_text_given){
+				json_object_push(qmenu_json_object , "text" , json_string_new(obj->qmenu_text));
+			}
 		}
 		printf("Do you want to integrate 'Check for Update' option in one of your QMenuBar Object(Y/n): ");
 		scanf("%s" , obj->option);
@@ -237,6 +273,9 @@ int config_generator_run(config_generator_t *obj){
 
 			if(is_string_empty(obj->qmenubar_qobject)){
 				obj->qmenubar_qobject_given = 0;
+			}else{
+				json_object_push(manual_update_check_object , "qmenubar-name" , 
+						 json_string_new(obj->qmenubar_qobject));
 			}
 		}
 		printf("Do you want to connect update check initialization with one of your QPushButton Object(Y/n): ");
@@ -250,13 +289,23 @@ int config_generator_run(config_generator_t *obj){
 			printf("Please enter the text of the QPushButton you want to connect: ");
 			obj->qpushbutton_text = get_string();	
 
+			qpushbutton_json_object = json_object_new(0);
+
 			if(is_string_empty(obj->qpushbutton_qobject)){
 				obj->qpushbutton_qobject_given = 0;
-			}
-			if(is_string_empty(obj->qpushbutton_text)){
-				obj->qpushbutton_text_given = 0;
+			}else{
+				json_object_push(qpushbutton_json_object , 
+				                 "qobject-name",
+					         json_string_new(obj->qpushbutton_qobject));	 
 			}
 
+			if(is_string_empty(obj->qpushbutton_text)){
+				obj->qpushbutton_text_given = 0;
+			}else{
+				json_object_push(qpushbutton_json_object ,
+						 "text",
+						 json_string_new(obj->qpushbutton_text));
+			}
 		}
 		printf("Do you want to override a QAction to update check initialization(Y/n): ");
 		scanf("%s" , obj->option);
@@ -267,150 +316,55 @@ int config_generator_run(config_generator_t *obj){
 			printf("Please enter the QObject name of the QAction you want to override: ");
 			obj->qaction_qobject = get_string();
 			printf("Please enter the text of the QAction you want to override: ");
-			obj->qpushbutton_text = get_string();
+			obj->qaction_text = get_string();
+
+			qaction_json_object = json_object_new(0);
 
 			if(is_string_empty(obj->qaction_qobject)){
 				obj->qaction_qobject_given = 0;
+			}else{
+				json_object_push(qaction_json_object ,
+					         "qobject-name" ,
+						 json_string_new(obj->qaction_qobject));
 			}
 			if(is_string_empty(obj->qaction_text)){
 				obj->qaction_text_given = 0;
+			}else{
+				json_object_push(qaction_json_object ,
+						 "text",
+						 json_string_new(obj->qaction_text));
 			}
 		}
+
+	/* Add all json objects to manual update check object */
+	if(obj->qmenu_qobject_given || obj->qmenu_text_given){
+		json_object_push(manual_update_check_object ,
+				 "qmenu",
+				 qmenu_json_object);
+	}
+
+	if(obj->qpushbutton_qobject_given || obj->qpushbutton_text_given){
+		json_object_push(manual_update_check_object ,
+				 "qpushbutton",
+				 qpushbutton_json_object);	
+	}
+	if(obj->qaction_qobject_given || obj->qaction_text_given){
+		json_object_push(manual_update_check_object ,
+				 "qaction-to-override",
+				 qaction_json_object);
+	}
+	json_object_push(main_object, "manual-update-check" , manual_update_check_object);
+
 	}else{
 		printl(fatal , "invalid option given");
 		return -1;
 	}
 
 	printl(info , "wrting configuration file..");
-	write_string("{\n" , obj->fp);
-	if(!is_string_empty(obj->name)){
-		write_string("   \"name\" : \"" , obj->fp);
-		write_string(obj->name , obj->fp);
-		write_string("\",\n" , obj->fp);
-	}
-	if(!is_string_empty(obj->ver)){
-		write_string("    \"version\" : \"" , obj->fp);
-		write_string(obj->ver , obj->fp);
-		write_string("\",\n" , obj->fp);
-	}
-	if(!is_string_empty(obj->qtver)){
-		write_string("    \"qt-version\" : \"" , obj->fp);
-		write_string(obj->qtver , obj->fp);
-		write_string("\",\n" , obj->fp);
-	}
-
-	if(is_string_empty(obj->bridge)){
-		printl(fatal , "no valid bridge is given , internal error");
-		return -1;
-	}
-
-	write_string("   \"bridge\" : \"" , obj->fp);
-	write_string(obj->bridge , obj->fp);
-	write_string("\"\n" , obj->fp);
-
-	if(opt == 1){
-		write_string("  ,\"auto-update-check\" : {\n" , obj->fp);
-	}
-
-	if(obj->update_check_on_startup){
-		write_string("    \"startup\" : true\n" , obj->fp);
-	}
-
-	if(obj->interval_given){
-		write_string("   ,\"interval\" : \"" , obj->fp);
-		write_string(obj->interval , obj->fp);
-		write_string("\"\n" , obj->fp);
-	}
-
-	if(opt == 1){
-		write_string("}\n" , obj->fp);	
-	}
-
-
-	if(opt == 2){
-		write_string("  ,\"manual-update-check\" : {\n" , obj->fp);
-	}
-	
-	if(obj->qmenu_qobject_given || obj->qmenu_text_given){
-		write_string("\"qmenu\" : {\n" , obj->fp);
-		if(obj->qmenu_qobject_given){
-		write_string("    \"qobject-name\" : \"" , obj->fp);
-		write_string(obj->qmenu_qobject , obj->fp);
-		if(obj->qmenu_text_given){
-			write_string("\"," , obj->fp);
-		}else{
-			write_string("\"" , obj->fp);	
-		}
-		}
-		if(obj->qmenu_text_given){
-		write_string("    \"text\" : \"" , obj->fp);
-		write_string(obj->qmenu_text , obj->fp);
-		write_string("\"" , obj->fp);	
-		}
-		write_string("}\n" , obj->fp);		
-
-	}
-	
-	if(obj->qmenubar_qobject_given){
-		if(obj->qmenu_qobject_given || obj->qmenu_text_given){
-			write_string(",\n" , obj->fp);
-		}
-		write_string("    \"qmenubar-name\" : \"" , obj->fp);
-		write_string(obj->qmenubar_qobject , obj->fp);
-		write_string("\"" , obj->fp);
-	}
-		
-	if(obj->qpushbutton_qobject_given || obj->qpushbutton_text_given){
-		if(obj->qmenu_qobject_given || obj->qmenu_text_given || obj->qmenubar_qobject_given){
-			write_string(",\n" , obj->fp);
-		}
-		write_string("\"qpushbutton\" : {\n" , obj->fp);
-		if(obj->qpushbutton_qobject_given){
-		write_string("    \"qobject-name\" : \"" , obj->fp);
-		write_string(obj->qpushbutton_qobject , obj->fp);
-		if(obj->qpushbutton_text_given){
-			write_string("\"," , obj->fp);
-		}else{
-			write_string("\"" , obj->fp);	
-		}
-		}
-		if(obj->qpushbutton_text_given){
-		write_string("    \"text\" : \"" , obj->fp);
-		write_string(obj->qpushbutton_text , obj->fp);
-		write_string("\"" , obj->fp);	
-		}
-		write_string("}\n" , obj->fp);		
-	}
-
-	if(obj->qaction_qobject_given || obj->qaction_text_given){
-		if(obj->qmenu_qobject_given || obj->qmenu_text_given || obj->qmenubar_qobject_given 
-		   || obj->qpushbutton_qobject_given || obj->qpushbutton_text_given){
-			write_string(",\n" , obj->fp);
-		}
-		write_string("\"qaction-to-override\" : {\n" , obj->fp);
-		if(obj->qaction_qobject_given){
-		write_string("    \"qobject-name\" : \"" , obj->fp);
-		write_string(obj->qaction_qobject , obj->fp);
-		if(obj->qaction_text_given){
-			write_string("\"," , obj->fp);
-		}else{
-			write_string("\"" , obj->fp);	
-		}
-		}
-		if(obj->qaction_text_given){
-		write_string("    \"text\" : \"" , obj->fp);
-		write_string(obj->qaction_text , obj->fp);
-		write_string("\"" , obj->fp);	
-		}
-		write_string("}\n" , obj->fp);		
-	}
-	
-	if(opt == 2){
-		write_string("}\n" , obj->fp);	
-	}
-
-	write_string("}" , obj->fp);
-
-	printl(info , "wrote configuration file successfully");
+        buf = calloc(json_measure(main_object)/sizeof(*buf) , sizeof(*buf));
+	json_serialize_ex(buf, main_object, options);
+	fwrite(buf , strlen(buf) , sizeof *buf , obj->fp);
+	free(buf);
+	json_builder_free(main_object);
 	return 0;
 }

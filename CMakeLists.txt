@@ -30,7 +30,9 @@ list(APPEND source            src/logger.c
 			      src/library_deployer.c
 			      src/injector.c
 			      src/md5.c
-			      src/main.c 
+			      src/main.c
+			      src/json_builder.c
+			      include/json_builder.h 
 			      include/logger.h 
 			      include/md5.h
 			      include/utils.h
