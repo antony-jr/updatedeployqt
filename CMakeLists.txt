@@ -21,15 +21,6 @@ if(GIT_COMMIT_STR)
 	add_definitions(-DGIT_COMMIT_STR="${GIT_COMMIT_STR}")
 endif()
 
-if(QT_PLUGIN_INJECTOR_COMMIT_STR)
-	add_definitions(-DQT_PLUGIN_INJECTOR_COMMIT_STR="${QT_PLUGIN_INJECTOR_COMMIT_STR}")
-endif()
-
-if(QT_UPD_BRIDGES_COMMIT_STR)
-	add_definitions(-DQT_UPD_BRIDGES_COMMIT_STR="${QT_UPD_BRIDGES_COMMIT_STR}")
-endif()
-
-
 add_executable(updatedeployqt src/logger.c
 	                      src/qt_version_info.c
 			      src/json.c

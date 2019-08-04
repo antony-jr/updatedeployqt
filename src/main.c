@@ -218,21 +218,6 @@ static void print_header(){
            __TIMESTAMP__
           );
     printf("Copyright (C) 2019 The Future Shell Laboratory.\n");
-    printf("Qt plugin injector git-commit %s.\n" ,
-#ifdef QT_PLUGIN_INJECTOR_COMMIT_STR
-	   QT_PLUGIN_INJECTOR_COMMIT_STR
-#else
-	   "none"
-#endif
-    );
-    printf("Qt update bridges git-commit %s.\n" ,
-#ifdef QT_UPD_BRIDGES_COMMIT_STR
-	   QT_UPD_BRIDGES_COMMIT_STR
-#else
-	   "none"
-#endif
-    );
-
     putchar('\n');
 }
 
