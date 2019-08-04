@@ -16,10 +16,80 @@ static int isnum(char c){
 	return 0;
 }
 
+/* function prototype of a function to parse all json values from a json object 
+ * in which these json values will be passed to the other function given by the function pointer.*/
 static int parse_json_object(json_value*,int (*)(const char *,json_value*,config_manager_t*) , config_manager_t *);
 
-static int handle_qmenu(const char *name, json_value *value, config_manager_t *obj){
+static int handle_qaction_to_override(const char *name, json_value *value, config_manager_t *obj){
+	if(value->type != json_string){
+		printl(fatal, "updatedeployqt.json:%d:%d: expected a string", value->line, value->col);
+		return -1;
+	}
 
+	if(!strcmp(name , "qobject-name")){
+		printl(info , "QAction QObject name(%s) is given, this QAction will be overrided" , 
+		       value->u.string.ptr);
+		obj->booleans[CONFIG_MANAGER_QACTION_QOBJECT_NAME_GIVEN] = true;
+		obj->qaction_qobject_name = calloc(1 ,sizeof(*(obj->qaction_qobject_name)) * value->u.string.length);
+		strncpy(obj->qaction_qobject_name , value->u.string.ptr , value->u.string.length);
+	}else if(!strcmp(name, "text")){
+		printl(info , "QAction title(%s) is given, this QAction will be overrided" , 
+		       value->u.string.ptr);
+		obj->booleans[CONFIG_MANAGER_QACTION_TEXT_GIVEN] = true;
+		obj->qaction_text = calloc(1 ,sizeof(*(obj->qaction_text)) * value->u.string.length);
+		strncpy(obj->qaction_text , value->u.string.ptr , value->u.string.length);	
+	}else{
+		return -1;
+	}
+	return 0;
+}
+
+static int handle_qpushbutton(const char *name, json_value *value, config_manager_t *obj){
+	if(value->type != json_string){
+		printl(fatal, "updatedeployqt.json:%d:%d: expected a string", value->line, value->col);
+		return -1;
+	}
+
+	if(!strcmp(name , "qobject-name")){
+		printl(info , "QPushButton QObject name(%s) is given, it will be connected to update check init" , 
+		       value->u.string.ptr);
+		obj->booleans[CONFIG_MANAGER_QPUSHBUTTON_QOBJECT_NAME_GIVEN] = true;
+		obj->qpushbutton_qobject_name = calloc(1 ,sizeof(*(obj->qpushbutton_qobject_name)) * value->u.string.length);
+		strncpy(obj->qpushbutton_qobject_name , value->u.string.ptr , value->u.string.length);
+	}else if(!strcmp(name, "text")){
+		printl(info , "QPushButton text(%s) is given, it will be connection to update check init" , 
+		       value->u.string.ptr);
+		obj->booleans[CONFIG_MANAGER_QPUSHBUTTON_TEXT_GIVEN] = true;
+		obj->qpushbutton_text = calloc(1 ,sizeof(*(obj->qpushbutton_text)) * value->u.string.length);
+		strncpy(obj->qpushbutton_text , value->u.string.ptr , value->u.string.length);	
+	}else{
+		return -1;
+	}
+	return 0;
+}
+
+static int handle_qmenu(const char *name, json_value *value, config_manager_t *obj){
+	if(value->type != json_string){
+		printl(fatal, "updatedeployqt.json:%d:%d: expected a string", value->line, value->col);
+		return -1;
+	}
+
+	if(!strcmp(name , "qobject-name")){
+		printl(info , "QMenu QObject name(%s) is given, 'Check for Update' option will be appended to it" , 
+		       value->u.string.ptr);
+		obj->booleans[CONFIG_MANAGER_QMENU_QOBJECT_NAME_GIVEN] = true;
+		obj->qmenu_qobject_name = calloc(1 ,sizeof(*(obj->qmenu_qobject_name)) * value->u.string.length);
+		strncpy(obj->qmenu_qobject_name , value->u.string.ptr , value->u.string.length);
+	}else if(!strcmp(name, "text")){
+		printl(info , "QMenu title(%s) is given, 'Check for Update' option will be appended to it" , 
+		       value->u.string.ptr);
+		obj->booleans[CONFIG_MANAGER_QMENU_TEXT_GIVEN] = true;
+		obj->qmenu_text = calloc(1 ,sizeof(*(obj->qmenu_text)) * value->u.string.length);
+		strncpy(obj->qmenu_text , value->u.string.ptr , value->u.string.length);	
+	}else{
+		return -1;
+	}
+	return 0;
 }
 
 static int handle_manual_update_check_json_object(const char *name , json_value *value , config_manager_t *obj){
@@ -28,30 +98,33 @@ static int handle_manual_update_check_json_object(const char *name , json_value 
 		return -1;
 	}
 
-	if(!strcmp(name , "qmenu-name")){
-		printl(info , "QMenu object name(%s) is given, 'Check for Update' option will be appended" , 
-		       value->u.string.ptr);
-		obj->booleans[CONFIG_MANAGER_QMENU_GIVEN] = true;
-		obj->qmenu_name = calloc(1 ,sizeof(*(obj->qmenu_name)) * value->u.string.length);
-		strncpy(obj->qmenu_name , value->u.string.ptr , value->u.string.length);
-	}else if(!strcmp(name , "qmenubar-name")){
-		printl(info , "QMenuBar object name(%s) is given, 'Check for Update' QMenu object will be created" , 
+	if(!strcmp(name , "qmenu")){
+		if(value->type != json_object){
+			printl(fatal , "updatedeployqt.json:%d:%d: expected a json object" , value->line , value->col);
+			return -1;
+		}
+		return parse_json_object(value , handle_qmenu , obj);
+	}
+	else if(!strcmp(name , "qpushbutton")){
+		if(value->type != json_object){
+			printl(fatal , "updatedeployqt.json:%d:%d: expected a json object" , value->line , value->col);
+			return -1;
+		}
+		return parse_json_object(value , handle_qpushbutton , obj);
+	}
+	else if(!strcmp(name , "qaction-to-override")){
+		if(value->type != json_object){
+			printl(fatal , "updatedeployqt.json:%d:%d: expected a json object" , value->line , value->col);
+			return -1;
+		}
+		return parse_json_object(value , handle_qaction_to_override , obj);	
+	}
+	else if(!strcmp(name , "qmenubar-name")){
+		printl(info , "QMenuBar QObject name(%s) is given, 'Check for Update' QMenu object will be created" , 
 			value->u.string.ptr);
-		obj->booleans[CONFIG_MANAGER_QMENUBAR_GIVEN] = true;
-		obj->qmenubar_name = calloc(1 ,sizeof(*(obj->qmenubar_name)) * value->u.string.length);
-		strncpy(obj->qmenubar_name , value->u.string.ptr , value->u.string.length);
-	}else if(!strcmp(name , "qpushbutton-name")){
-		printl(info , "QPushButton object name(%s) is given, "
-			      "this button will be connected" , value->u.string.ptr);
-		obj->booleans[CONFIG_MANAGER_QPUSHBUTTON_GIVEN] = true;
-		obj->qpushbutton_name = calloc(1 ,sizeof(*(obj->qpushbutton_name)) * value->u.string.length);
-		strncpy(obj->qpushbutton_name , value->u.string.ptr , value->u.string.length);
-	}else if(!strcmp(name , "qaction-to-override")){
-		printl(info , "QAction to override is given , QAction with text containing '%s' will be overrided" , 
-			value->u.string.ptr);
-		obj->booleans[CONFIG_MANAGER_QACTION_TO_REMOVE_GIVEN] = true;
-		obj->qaction_to_override = calloc(1 ,sizeof(*(obj->qaction_to_override)) * value->u.string.length);
-		strncpy(obj->qaction_to_override , value->u.string.ptr , value->u.string.length);
+		obj->booleans[CONFIG_MANAGER_QMENUBAR_QOBJECT_NAME_GIVEN] = true;
+		obj->qmenubar_qobject_name = calloc(1 ,sizeof(*(obj->qmenubar_qobject_name)) * value->u.string.length);
+		strncpy(obj->qmenubar_qobject_name , value->u.string.ptr , value->u.string.length);
 	}
 	else{
 		return -1;
@@ -82,14 +155,6 @@ static int handle_auto_update_check_json_object(const char *name , json_value *v
 		printl(info , "auto update check on startup of the application: %s" ,
 		       (value->u.boolean) ? "true" : "false");
 		obj->booleans[CONFIG_MANAGER_AUTO_UPDATE_CHECK_ON_STARTUP] = true;
-	}else if(!strcmp(name , "close")){
-		printl(info , "auto update check on close of the application: %s",
-			(value->u.boolean) ? "true" : "false");
-		obj->booleans[CONFIG_MANAGER_AUTO_UPDATE_CHECK_ON_CLOSE] = true;
-	}else if(!strcmp(name , "cyclic")){
-		printl(info , "cyclic auto update check of the application: %s",
-			(value->u.boolean) ? "true" : "false");
-		obj->booleans[CONFIG_MANAGER_AUTO_UPDATE_CHECK_CYCLIC] = true;
 	}else{
 		return -1;
 	}
@@ -169,7 +234,7 @@ static int handle_basic_info(const char *name , json_value *value , config_manag
 		}
 		obj->booleans[CONFIG_MANAGER_AUTO_UPDATE_CHECK] = true;
 		printl(info , "adding auto update check initialization for this application");
-		parse_json_object(value , handle_auto_update_check_json_object , obj);
+		return parse_json_object(value , handle_auto_update_check_json_object , obj);
 	}
 	else if(!strcmp(name , "manual-update-check")){
 		if(value->type != json_object){
@@ -178,7 +243,7 @@ static int handle_basic_info(const char *name , json_value *value , config_manag
 		}
 		obj->booleans[CONFIG_MANAGER_MANUAL_UPDATE_CHECK] = true;
 		printl(info , "adding manual update check initialization for this application");
-		parse_json_object(value , handle_manual_update_check_json_object , obj);
+		return parse_json_object(value , handle_manual_update_check_json_object , obj);
 	}
 	else{
 		return -1;
@@ -203,6 +268,7 @@ static int parse_json_object(json_value *value , int (*handle_json_value)(const 
 				(value->u.object.values[x].value)->line ,
 				(value->u.object.values[x].value)->col,
 				value->u.object.values[x].name);
+			return -1;
 		}
 	}
 	return 0;
@@ -210,8 +276,9 @@ static int parse_json_object(json_value *value , int (*handle_json_value)(const 
 
 static int parse(const char *json_contents , size_t json_contents_len , config_manager_t *obj){
 	json_value *value = NULL;
+	int r = 0;
 	if(!json_contents || !json_contents_len){
-		return -1;
+		return (r=-1);
 	}
        
 	json_settings settings = { 0 };
@@ -220,15 +287,15 @@ static int parse(const char *json_contents , size_t json_contents_len , config_m
 	value = json_parse_ex(&settings , json_contents , json_contents_len , error);
 	if(!value){
 		printl(fatal , "updatedeployqt.json:%s" , error);
-		return -1;
+		return (r=-1);
 	}
 	if(value->type != json_object){
 		printl(fatal , "updatedeployqt.json:0:0: expected a json object");
-		return -1;
+		return (r=-1);
 	}
-	parse_json_object(value , handle_basic_info , obj); 	
+	r = parse_json_object(value , handle_basic_info , obj); 	
 	json_value_free(value);
-	return 0;
+	return r;
 }
 
 config_manager_t *config_manager_create(const char *config){
@@ -256,7 +323,6 @@ config_manager_t *config_manager_create(const char *config){
 
 	/* clear the boolean string. */	
 	memset(obj->booleans , 0 , sizeof(obj->booleans));
-	
 	return obj;
 }
 
@@ -274,17 +340,23 @@ void config_manager_destroy(config_manager_t *obj){
 	if(obj->bridge_name){
 		free(obj->bridge_name);
 	}
-	if(obj->qmenu_name){
+	if(obj->qmenu_qobject_name){
 		free(obj->qmenu_name);
 	}
-	if(obj->qmenubar_name){
-		free(obj->qmenubar_name);
+	if(obj->qmenu_text){
+		free(obj->qmenu_text);
 	}
-	if(obj->qpushbutton_name){
-		free(obj->qpushbutton_name);
+	if(obj->qmenubar_qobject_name){
+		free(obj->qmenubar_qobject_name);
 	}
-	if(obj->qaction_to_override){
-		free(obj->qaction_to_override);
+	if(obj->qpushbutton_qobject_name){
+		free(obj->qpushbutton_qobject_name);
+	}
+	if(obj->qaction_qobject_name){
+		free(obj->qaction_qobject_name);
+	}
+	if(obj->qaction_text){
+		free(obj->qaction_text);
 	}
 	free(obj);
 }
@@ -350,32 +422,53 @@ const char *config_manager_get_bridge_name(config_manager_t *obj){
 	return obj->bridge_name;
 }
 
-const char *config_manager_get_qmenu_name(config_manager_t *obj){
+const char *config_manager_get_qmenu_qobject_name(config_manager_t *obj){
 	if(!obj){
 		return NULL;
 	}
-	return obj->qmenu_name;
+	return obj->qmenu_qobject_name;
 }
 
-const char *config_manager_get_qmenubar_name(config_manager_t *obj){
+const char *config_manager_get_qmenu_text(config_manager_t *obj){
 	if(!obj){
 		return NULL;
 	}
-	return obj->qmenubar_name;
+	return obj->qmenu_text;
 }
 
-const char *config_manager_get_qpushbutton_name(config_manager_t *obj){
+const char *config_manager_get_qmenubar_qobject_name(config_manager_t *obj){
 	if(!obj){
 		return NULL;
 	}
-	return obj->qpushbutton_name;
+	return obj->qmenubar_qobject_name;
 }
 
-const char *config_manager_get_qaction_to_override(config_manager_t *obj){
+const char *config_manager_get_qpushbutton_qobject_name(config_manager_t *obj){
 	if(!obj){
 		return NULL;
 	}
-	return obj->qaction_to_override;
+	return obj->qpushbutton_qobject_name;
+}
+
+const char *config_manager_get_qpushbutton_text(config_manager_t *obj){
+	if(!obj){
+		return NULL;
+	}
+	return obj->qpushbutton_text;
+}
+
+const char *config_manager_get_qaction_qobject_name(config_manager_t *obj){
+	if(!obj){
+		return NULL;
+	}
+	return obj->qaction_qobject_name;
+}
+
+const char *config_manager_get_qaction_text(config_manager_t *obj){
+	if(!obj){
+		return NULL;
+	}
+	return obj->qaction_text;
 }
 
 const char *config_manager_get_qt_version(config_manager_t *obj){

@@ -69,10 +69,13 @@ int config_manager_run(config_manager_t*);
 const char *config_manager_get_boolean_string(config_manager_t*);
 
 const char *config_manager_get_bridge_name(config_manager_t*);
-const char *config_manager_get_qmenu_name(config_manager_t*);
-const char *config_manager_get_qmenubar_name(config_manager_t*);
-const char *config_manager_get_qpushbutton_name(config_manager_t*);
-const char *config_manager_get_qaction_to_override(config_manager_t*);
+const char *config_manager_get_qmenu_qobject_name(config_manager_t*);
+const char *config_manager_get_qmenu_text(config_manager_t*);
+const char *config_manager_get_qmenubar_qobject_name(config_manager_t*);
+const char *config_manager_get_qpushbutton_qobject_name(config_manager_t*);
+const char *config_manager_get_qpushbutton_text(config_manager_t*);
+const char *config_manager_get_qaction_qobject_name(config_manager_t*);
+const char *config_manager_get_qaction_text(config_manager_t*);
 const char *config_manager_get_qt_version(config_manager_t*);
 
 /* returns time in miliseconds. */

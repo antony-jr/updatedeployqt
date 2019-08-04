@@ -105,3 +105,24 @@ int copy_file(const char *dest , const char *src){
         fclose(dest_fp);
 	return 0;
 }
+
+int write_string_as_file(const char *str , size_t str_len , const char *path){
+	if(!str || !path){
+		return -1;
+	}
+	FILE *fp;
+	size_t iter = 0;
+
+	if(!(fp=fopen(path, "wb"))){
+		printl(fatal , "cannot open '%s' for writing" , path);
+		fclose(fp);
+		return -1;
+	}
+
+	while(iter < str_len){
+		putc(str[iter] , fp);
+		++iter;
+	}
+	fclose(fp);
+	return 0;
+}

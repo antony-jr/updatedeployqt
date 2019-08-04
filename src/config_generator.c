@@ -121,15 +121,27 @@ void config_generator_destroy(config_generator_t *obj){
 	if(obj->interval){
 		free(obj->interval);
 	}
-	if(obj->qmenu){
-		free(obj->qmenu);
+	if(obj->qmenu_qobject){
+		free(obj->qmenu_qobject);
+	}
+	if(obj->qmenu_text){
+		free(obj->qmenu_text);
 	}
 	if(obj->qmenubar){
 		free(obj->qmenubar);
 	}
-	if(obj->qpushbutton){
-		free(obj->qpushbutton);
+	if(obj->qpushbutton_qobject){
+		free(obj->qpushbutton_qobject);
+	}
+	if(obj->qpushbutton_text){
+		free(obj->qpushbutton_text);
 	}	
+	if(obj->qaction_qobject){
+		free(obj->qaction_qobject);
+	}
+	if(obj->qaction_text){
+		free(obj->qaction_text);
+	}
 }
 
 int config_generator_run(config_generator_t *obj){
@@ -152,7 +164,7 @@ int config_generator_run(config_generator_t *obj){
 	printf("1. AppImageUpdater - Used to deploy updater for Qt Application packaged with AppImage.\n");
 	printf("2. QInstaller      - Used to deploy updater for Qt Installer Framework.\n");
 	printf("3. Github Releases - Used to deploy updater for Qt Application released on Github.\n");
-	printf("Enter you option: ");
+	printf("Enter you option(1/2/3): ");
 	scanf("%d" , &opt);
 
 	if(opt < 1 || opt > 3){
@@ -178,7 +190,7 @@ int config_generator_run(config_generator_t *obj){
 	printf("\nSelect the type of update you prefer:\n");
 	printf("1. Auto Update Check Initialization - Automatically check for upates without concern from user.\n");
 	printf("2. Manual Update Check Initialization - Use this to follow GDPR.\n");
-	printf("Enter your option: ");
+	printf("Enter your option(1/2): ");
 	scanf("%d" , &opt);
 
 	if(opt == 1){
@@ -187,47 +199,82 @@ int config_generator_run(config_generator_t *obj){
 		free(get_string());
 		if(istrue(obj->option)){
 			obj->update_check_on_startup = 1;
-		}
-
-		printf("Do you want to check update on close(Y/n): ");
-		scanf("%s" , obj->option);
-		free(get_string());
-		if(istrue(obj->option)){
-			obj->update_check_on_close = 1;
-		}
-
-		printf("Do you want to check for update in a loop(Y/n): ");
-		scanf("%s" , obj->option);
-		free(get_string());
-		if(istrue(obj->option)){
-			obj->cyclic_update_check = 1;
-			printf("Please enter the interval of a single iteration of the update check: ");
+			obj->interval_given = 1;
+			printf("Please enter an interval to start the update check(in miliseconds)(Default=Press Enter): ");
 			obj->interval = get_string();
+			if(is_string_empty(obj->interval)){
+				free(obj->interval);
+				obj->interval_given = 0;
+				obj->interval = NULL;
+			}
 		}
 	}else if(opt == 2){
 		printf("\nDo you want to integrate 'Check for Update' option in one of your QMenu Object(Y/n): ");
 		scanf("%s" , obj->option);
 		free(get_string());
 		if(istrue(obj->option)){
-			obj->qmenu_given = 1;
+			obj->qmenu_qobject_given = 1;
+			obj->qmenu_text_givne = 1;
 			printf("Please enter the QObject name of the QMenu you want to integrate: ");
-			obj->qmenu = get_string();
+			obj->qmenu_qobject = get_string();
+			printf("Please enter the title of the QMenu you want to integrate: ");
+			obj->qmenu_text = get_string();
+			
+			if(is_string_empty(obj->qmenu_qobject)){
+				obj->qmenu_qobject_given = 0;
+			}
+			if(is_string_empty(obj->qmenu_text)){
+				obj->qmenu_text_given = 0;
+			}
 		}
 		printf("Do you want to integrate 'Check for Update' option in one of your QMenuBar Object(Y/n): ");
 		scanf("%s" , obj->option);
 		free(get_string());
 		if(istrue(obj->option)){
-			obj->qmenubar_given = 1;
+			obj->qmenubar_qobject_given = 1;
 			printf("Please enter the QObject name of the QMenuBar you want to integrate: ");
-			obj->qmenubar = get_string();
+			obj->qmenubar_qobject = get_string();
+
+			if(is_string_empty(obj->qmenubar_qobject)){
+				obj->qmenubar_qobject_given = 0;
+			}
 		}
 		printf("Do you want to connect update check initialization with one of your QPushButton Object(Y/n): ");
 		scanf("%s" , obj->option);
 		free(get_string());
 		if(istrue(obj->option)){
-			obj->qpushbutton_given = 1;
+			obj->qpushbutton_qobject_given = 1;
+			obj->qpushbutton_text_given = 1;
 			printf("Please enter the QObject name of the QPushButton you want to connect: ");
-			obj->qpushbutton = get_string();
+			obj->qpushbutton_qobject = get_string();
+			printf("Please enter the text of the QPushButton you want to connect: ");
+			obj->qpushbutton_text = get_string();	
+
+			if(is_string_empty(obj->qpushbutton_qobject)){
+				obj->qpushbutton_qobject_given = 0;
+			}
+			if(is_string_empty(obj->qpushbutton_text)){
+				obj->qpushbutton_text_given = 0;
+			}
+
+		}
+		printf("Do you want to override a QAction to update check initialization(Y/n): ");
+		scanf("%s" , obj->option);
+		free(get_string());
+		if(istrue(obj->option)){
+			obj->qaction_qobject_given = 1;
+			obj->qaction_text_given = 1;
+			printf("Please enter the QObject name of the QAction you want to override: ");
+			obj->qaction_qobject = get_string();
+			printf("Please enter the text of the QAction you want to override: ");
+			obj->qpushbutton_text = get_string();
+
+			if(is_string_empty(obj->qaction_qobject)){
+				obj->qaction_qobject_given = 0;
+			}
+			if(is_string_empty(obj->qaction_text)){
+				obj->qaction_text_given = 0;
+			}
 		}
 	}else{
 		printl(fatal , "invalid option given");
@@ -269,14 +316,6 @@ int config_generator_run(config_generator_t *obj){
 		write_string("    \"startup\" : true\n" , obj->fp);
 	}
 
-	if(obj->update_check_on_close){
-		write_string("   ,\"close\" : true\n" , obj->fp);
-	}
-
-	if(obj->cyclic_update_check){
-		write_string("   ,\"cyclic\" : true\n" , obj->fp);
-	}
-
 	if(obj->interval_given){
 		write_string("   ,\"interval\" : \"" , obj->fp);
 		write_string(obj->interval , obj->fp);
@@ -292,28 +331,78 @@ int config_generator_run(config_generator_t *obj){
 		write_string("  ,\"manual-update-check\" : {\n" , obj->fp);
 	}
 	
-	if(obj->qmenu_given){
-		write_string("    \"qmenu-name\" : \"" , obj->fp);
-		write_string(obj->qmenu , obj->fp);
-		write_string("\"" , obj->fp);
+	if(obj->qmenu_qobject_given || obj->qmenu_text_given){
+		write_string("\"qmenu\" : {\n" , obj->fp);
+		if(obj->qmenu_qobject_given){
+		write_string("    \"qobject-name\" : \"" , obj->fp);
+		write_string(obj->qmenu_qobject , obj->fp);
+		if(obj->qmenu_text_given){
+			write_string("\"," , obj->fp);
+		}else{
+			write_string("\"" , obj->fp);	
+		}
+		}
+		if(obj->qmenu_text_given){
+		write_string("    \"text\" : \"" , obj->fp);
+		write_string(obj->qmenu_text , obj->fp);
+		write_string("\"" , obj->fp);	
+		}
+		write_string("}\n" , obj->fp);		
+
 	}
 	
-	if(obj->qmenubar_given){
-		if(obj->qmenu_given){
+	if(obj->qmenubar_qobject_given){
+		if(obj->qmenu_qobject_given || obj->qmenu_text_given){
 			write_string(",\n" , obj->fp);
 		}
 		write_string("    \"qmenubar-name\" : \"" , obj->fp);
-		write_string(obj->qmenubar , obj->fp);
+		write_string(obj->qmenubar_qobject , obj->fp);
 		write_string("\"" , obj->fp);
 	}
 		
-	if(obj->qpushbutton_given){
-		if(obj->qmenu_given || obj->qmenubar_given){
+	if(obj->qpushbutton_qobject_given || obj->qpushbutton_text_given){
+		if(obj->qmenu_qobject_given || obj->qmenu_text_given || obj->qmenubar_qobject_given){
 			write_string(",\n" , obj->fp);
 		}
-		write_string("    \"qpushbutton-name\" : \"" , obj->fp);
-		write_string(obj->qpushbutton , obj->fp);
-		write_string("\"\n" , obj->fp);
+		write_string("\"qpushbutton\" : {\n" , obj->fp);
+		if(obj->qpushbutton_qobject_given){
+		write_string("    \"qobject-name\" : \"" , obj->fp);
+		write_string(obj->qpushbutton_qobject , obj->fp);
+		if(obj->qpushbutton_text_given){
+			write_string("\"," , obj->fp);
+		}else{
+			write_string("\"" , obj->fp);	
+		}
+		}
+		if(obj->qpushbutton_text_given){
+		write_string("    \"text\" : \"" , obj->fp);
+		write_string(obj->qpushbutton_text , obj->fp);
+		write_string("\"" , obj->fp);	
+		}
+		write_string("}\n" , obj->fp);		
+	}
+
+	if(obj->qaction_qobject_given || obj->qaction_text_given){
+		if(obj->qmenu_qobject_given || obj->qmenu_text_given || obj->qmenubar_qobject_given 
+		   || obj->qpushbutton_qobject_given || obj->qpushbutton_text_given){
+			write_string(",\n" , obj->fp);
+		}
+		write_string("\"qaction-to-override\" : {\n" , obj->fp);
+		if(obj->qaction_qobject_given){
+		write_string("    \"qobject-name\" : \"" , obj->fp);
+		write_string(obj->qaction_qobject , obj->fp);
+		if(obj->qaction_text_given){
+			write_string("\"," , obj->fp);
+		}else{
+			write_string("\"" , obj->fp);	
+		}
+		}
+		if(obj->qaction_text_given){
+		write_string("    \"text\" : \"" , obj->fp);
+		write_string(obj->qaction_text , obj->fp);
+		write_string("\"" , obj->fp);	
+		}
+		write_string("}\n" , obj->fp);		
 	}
 	
 	if(opt == 2){

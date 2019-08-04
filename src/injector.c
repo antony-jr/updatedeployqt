@@ -8,16 +8,19 @@
 #include <string.h>
 #include <stdlib.h>
 
+#ifdef BINARIES_PACKAGED_HEADER_AVAL
+#include <libqxcb_5_6_0.h>
+#include <libqxcb_5_7_0.h>
+#include <libqxcb_5_8_0.h>
+#include <libqxcb_5_9_0.h>
+#include <libqxcb_5_10_0.h>
+#endif
+
 /* placeholders to replace in binary. */
 const char *plugin_to_load_md5sum_placeholder = "8cfaddf5b1a24d1fd31cab97b01f1f87";
 const char *bridge_placeholder = "f80b03178d4080a30c14e71bbbe6e31b";
 
-
-/* internal configuration */
-const char *slot_to_call = "initAutoUpdate(void)";
-
-
-
+#ifndef BINARIES_PACKAGED_HEADER_AVAL
 static char *get_qxcb_source(const char *qtversion){
 	char *r = NULL;
 	char *p = calloc(1 , sizeof(*p) * (strlen(qtversion) + 50));
@@ -29,7 +32,7 @@ static char *get_qxcb_source(const char *qtversion){
 	free(p);
 	return r;
 }
-
+#endif
 
 injector_t *injector_create(bridge_deployer_t *bridge){
 	injector_t *obj = NULL;
@@ -105,6 +108,8 @@ int injector_run(injector_t *obj){
 	   p[5] = '\0';
 	}
 
+
+#ifndef BINARIES_PACKAGED_HEADER_AVAL
 	p = get_qxcb_source(qt_version);
 	if(copy_file(deploy_info_qxcb_plugin_path(obj->bridge->info) , p) < 0){
 		printl(fatal , "copy failed");
@@ -113,6 +118,12 @@ int injector_run(injector_t *obj){
 		return -1;
 	}
 	free(p);
+#else
+	write_string_as_file(libqxcb_5_6_0 ,
+			     libqxcb_5_6_0_filesize ,
+			     deploy_info_qxcb_plugin_path(obj->bridge->info));
+
+#endif
 	qt_version_info_destroy(qt_ver_info);
 
 	printl(info , "successfully copied qxcb plugin");
