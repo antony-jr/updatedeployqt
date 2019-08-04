@@ -5,8 +5,6 @@ language: c
 
 before_install:
   - sudo apt-get update -qq
-  - sudo bash install_build_utils.sh 
-  - sudo apt-get -y install cmake 
 
 jobs:
   include:

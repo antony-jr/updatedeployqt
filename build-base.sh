@@ -23,6 +23,8 @@ HpackBin="$3"
 
 QtVersionNoDot=$(echo $QtVersion | tr -s '.' | tr '.' '_')
 
+bash "./install_build_utils.sh"
+
 printf "Building Qt Plugin Injector: Qt $QtVersion\n"
 printf "Using Cache Directory: $CacheDir\n"
 printf "Using hpack: $HpackBin\n\n"

@@ -19,6 +19,7 @@ fi
 
 CacheDir="$1"
 
+apt-get install -y cmake
 cd tools
 cd hpack
 mkdir build

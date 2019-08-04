@@ -20,6 +20,8 @@ fi
 CacheDir="$1"
 GitCommit=$(git rev-parse --short HEAD)
 
+apt-get install -y cmake
+
 mkdir build
 cd build
 cmake -DGIT_COMMIT_STR="$GitCommit" -DCACHE_DIR="$CacheDir" ..
