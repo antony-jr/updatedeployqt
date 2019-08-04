@@ -18,12 +18,14 @@ if [ ! -f ./build-tools.sh ]; then
 fi
 
 CacheDir="$1"
+GitCommit=$(git rev-parse --short HEAD)
 
 mkdir build
 cd build
-cmake -DGIT_COMMIT_STR=$(git rev-parse --short HEAD) -DCACHE_DIR="$CacheDir" ..
+cmake -DGIT_COMMIT_STR="$GitCommit" -DCACHE_DIR="$CacheDir" ..
 make -j$(nproc)
 
 wget https://raw.githubusercontent.com/probonopd/uploadtool/master/upload.sh
-bash upload.sh "./updatedeployqt"
+mv "./updatedeployqt" "./updatedeployqt-continuous-x86_64.bin"
+bash upload.sh "./updatedeployqt-continuous-x86_64.bin"
 

@@ -17,16 +17,8 @@ include_directories(include)
 
 add_definitions(-DJSON_TRACK_SOURCE) # tell json-parser to track the line from json files.
 
-if(CACHE_DIR)
-	message("-- Static linking with libgcc.")
-	set(CMAKE_EXE_LINKER_FLAGS "--static -static-libgcc")
-endif()
-
-if(GIT_COMMIT_STR)
-	add_definitions(-DGIT_COMMIT_STR="${GIT_COMMIT_STR}")
-endif()
-
-add_executable(updatedeployqt src/logger.c
+SET(source)
+list(APPEND source            src/logger.c
 	                      src/qt_version_info.c
 			      src/json.c
 			      src/utils.c
@@ -52,6 +44,28 @@ add_executable(updatedeployqt src/logger.c
 			      include/config_generator.h
 			      include/json.h)
 
+
+
+if(CACHE_DIR)
+	message("-- Will be static linking with libgcc.")
+	set(CMAKE_EXE_LINKER_FLAGS "--static -static-libgcc")
+
+	include_directories(${CACHE_DIR})
+	add_definitions(-DBINARIES_PACKAGED_HEADER_AVAL)
+
+	list(APPEND source ${CACHE_DIR}/libqxcb_5_6_0.h
+		           ${CACHE_DIR}/libqxcb_5_7_0.h
+			   ${CACHE_DIR}/libqxcb_5_8_0.h
+			   ${CACHE_DIR}/libqxcb_5_9_0.h
+			   ${CACHE_DIR}/libqxcb_5_10_0.h
+			   ${CACHE_DIR}/aiub.h)
+endif()
+
+if(GIT_COMMIT_STR)
+	add_definitions(-DGIT_COMMIT_STR="${GIT_COMMIT_STR}")
+endif()
+
+add_executable(updatedeployqt ${source})
 target_link_libraries(updatedeployqt PUBLIC m)
 target_include_directories(updatedeployqt PUBLIC . include)
 
