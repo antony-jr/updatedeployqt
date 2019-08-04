@@ -1,0 +1,62 @@
+sudo: required
+compiler: gcc
+dist: trusty
+language: c
+
+before_install:
+  - sudo apt-get update -qq
+  - sudo bash install_build_utils.sh  
+
+jobs:
+  include:
+    - stage: Build Tools 
+      os: linux
+      env: CACHE_NAME=shared
+      script: "./build-tools.sh /home/travis/dist"
+      cache:
+         directories:
+            - /home/travis/dist/
+    - stage: QtPluginInjector for Qt 5.6.0
+      os: linux
+      env: CACHE_NAME=shared
+      script: "./build-base.sh 5.6.0 /home/travis/dist /home/travis/dist/hpack"
+      cache:
+         directories:
+            - /home/travis/dist/
+    - stage: QtPluginInjector for Qt 5.7.0
+      os: linux
+      env: CACHE_NAME=shared
+      script: "./build-base.sh 5.7.0 /home/travis/dist /home/travis/dist/hpack"
+      cache:
+         directories:
+            - /home/travis/dist/
+    - stage: QtPluginInjector for Qt 5.8.0
+      os: linux
+      env: CACHE_NAME=shared
+      script: "./build-base.sh 5.8.0 /home/travis/dist /home/travis/dist/hpack"
+      cache:
+         directories:
+            - /home/travis/dist/
+    - stage: QtPluginInjector for Qt 5.9.0
+      os: linux
+      env: CACHE_NAME=shared
+      script: "./build-base.sh 5.9.0 /home/travis/dist /home/travis/dist/hpack"
+      cache:
+         directories:
+            - /home/travis/dist/
+    - stage: QtPluginInjector for Qt 5.10.0
+      os: linux
+      env: CACHE_NAME=shared
+      script: "./build-base.sh 5.10.0 /home/travis/dist /home/travis/dist/hpack"
+      cache:
+         directories:
+            - /home/travis/dist/ 
+    - stage: Build and Deploy
+      os: linux
+      env: CACHE_NAME=shared
+      script: "./build-and-deploy.sh /home/travis/dist"
+      cache:
+         directories:
+            - /home/travis/dist/
+
+

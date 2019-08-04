@@ -1,9 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=updatedeployqt
-Exec=updatedeployqt
-Comment=A powerful CLI tool to deploy Auto Update in a single command for Qt Applications
-Icon=updatedeployqt
-Categories=Development;
-Terminal=true
-
