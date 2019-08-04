@@ -31,7 +31,8 @@ cd "base/QtPluginInjector/Qt$QtVersion"
 eval "bash linux_main.sh"
 cd ../../..
 
-eval "cp /usr/local/Qt-$QtVersion/plugins/platforms/libqxcb.so /tmp/"
+eval "cp -f /usr/local/Qt-$QtVersion/plugins/platforms/libqxcb.so /tmp/"
+eval "cp -f /usr/local/Qt-$QtVersion/plugins/platforms/libqxcb.so $CacheDir/libqxcb-$QtVersion.so"
 eval "$HpackBin /tmp/libqxcb.so -o $CacheDir/libqxcb_$QtVersionNoDot.h -g INCLUDED_LIBQXCB_$QtVersionNoDot -v libqxcb_$QtVersionNoDot"
 
 # Build all update bridges if its the lowest possible qt build
@@ -43,5 +44,6 @@ if [ "$QtVersion" == "5.6.0" ]
 		cd build
 		/usr/local/Qt-$QtVersion/bin/qmake "CONFIG+=FULL_BUILD" ..
 		make -j$(nproc)
+		eval "cp -f ./libAppImageUpdaterBridge.so $CacheDir/libAppImageUpdaterBridge.so"
 		eval "$HpackBin ./libAppImageUpdaterBridge.so -o $CacheDir/aiub.h -g INCLUDED_AIUB_BINARY -v aiub_binary"
 fi

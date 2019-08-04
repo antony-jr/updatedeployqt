@@ -25,7 +25,33 @@ cd build
 cmake -DGIT_COMMIT_STR="$GitCommit" -DCACHE_DIR="$CacheDir" ..
 make -j$(nproc)
 
-wget https://raw.githubusercontent.com/probonopd/uploadtool/master/upload.sh
-mv "./updatedeployqt" "./updatedeployqt-continuous-x86_64.bin"
-bash upload.sh "./updatedeployqt-continuous-x86_64.bin"
+mv "./updatedeployqt" "../updatedeployqt-continuous-x86_64.bin"
+cd ..
+rm -rf build
 
+# Now lets build an AppImage just as an option
+mkdir build
+cd build
+cmake -DGIT_COMMIT_STR="$GitCommit" ..
+make -j$(nproc)
+make install DESTDIR=../appdir
+cd ..
+mkdir appdir/data
+cd appdir/data
+cp "$CacheDir/libqxcb-5.6.0.so" .
+cp "$CacheDir/libqxcb-5.7.0.so" .
+cp "$CacheDir/libqxcb-5.8.0.so" .
+cp "$CacheDir/libqxcb-5.9.0.so" .
+cp "$CacheDir/libqxcb-5.10.0.so" .
+cp "$CacheDir/libAppImageUpdaterBridge.so" .
+cd ../..
+
+wget -q http://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+chmod +x linuxdeploy-x86_64.AppImage
+export VERSION="continuous"
+./linuxdeploy-x86_64.AppImage --appdir appdir --output appimage
+
+
+# Deploy to Github releases
+wget https://raw.githubusercontent.com/probonopd/uploadtool/master/upload.sh
+bash upload.sh "./updatedeployqt-continuous-x86_64.bin" "updatedeployqt-continuous-x86_64.AppImage" "*zsync"
