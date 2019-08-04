@@ -1,0 +1,6 @@
+[submodule "base/AppImageUpdaterBridge"]
+	path = base/AppImageUpdaterBridge
+	url = https://github.com/antony-jr/AppImageUpdaterBridge
+[submodule "tools/hpack"]
+	path = tools/hpack
+	url = https://github.com/antony-jr/hpack
