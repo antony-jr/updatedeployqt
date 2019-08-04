@@ -5,7 +5,8 @@ language: c
 
 before_install:
   - sudo apt-get update -qq
-  - sudo bash install_build_utils.sh  
+  - sudo bash install_build_utils.sh 
+  - sudo apt-get -y install cmake 
 
 jobs:
   include:
@@ -59,4 +60,7 @@ jobs:
          directories:
             - /home/travis/dist/
 
-
+branches:
+  except:
+    - # Do not build tags that we create when we upload to GitHub Releases
+    - /^(?i:continuous)/
