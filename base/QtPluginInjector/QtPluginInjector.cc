@@ -25,17 +25,10 @@ const char Bridge[33] = "f80b03178d4080a30c14e71bbbe6e31b";
  * Bridge[2] - Bridge[33] yet to be filled.
 */
 
-static QMetaMethod getMethod(QObject *object, const char *function)
-{
-    auto metaObject = object->metaObject();
-    return metaObject->method(metaObject->indexOfMethod(QMetaObject::normalizedSignature(function)));
-}
-
 QtPluginInjector::QtPluginInjector(QObject *parent)
 	: QObject(parent)
 {
 	m_Timer.setInterval(4000);
-	m_Timer.setSingleShot(true);
 	connect(&m_Timer , &Timer::timeout , this , &QtPluginInjector::tryLoadPlugin);
 }
 
