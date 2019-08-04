@@ -17,35 +17,35 @@ jobs:
       cache:
          directories:
             - /home/travis/dist/
-    - stage: QtPluginInjector for Qt 5.6.0
+    - stage: Base for Qt 5.6.0
       os: linux
       env: CACHE_NAME=shared
       script: "sudo bash build-base.sh 5.6.0 /home/travis/dist /home/travis/dist/hpack"
       cache:
          directories:
             - /home/travis/dist/
-    - stage: QtPluginInjector for Qt 5.7.0
+    - stage: Base for Qt 5.7.0
       os: linux
       env: CACHE_NAME=shared
       script: "sudo bash build-base.sh 5.7.0 /home/travis/dist /home/travis/dist/hpack"
       cache:
          directories:
             - /home/travis/dist/
-    - stage: QtPluginInjector for Qt 5.8.0
+    - stage: Base for Qt 5.8.0
       os: linux
       env: CACHE_NAME=shared
       script: "sudo bash build-base.sh 5.8.0 /home/travis/dist /home/travis/dist/hpack"
       cache:
          directories:
             - /home/travis/dist/
-    - stage: QtPluginInjector for Qt 5.9.0
+    - stage: Base for Qt 5.9.0
       os: linux
       env: CACHE_NAME=shared
       script: "sudo bash build-base.sh 5.9.0 /home/travis/dist /home/travis/dist/hpack"
       cache:
          directories:
             - /home/travis/dist/
-    - stage: QtPluginInjector for Qt 5.10.0
+    - stage: Base for Qt 5.10.0
       os: linux
       env: CACHE_NAME=shared
       script: "sudo bash build-base.sh 5.10.0 /home/travis/dist /home/travis/dist/hpack"

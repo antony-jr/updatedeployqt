@@ -22,6 +22,7 @@ CacheDir="$1"
 cd tools
 cd hpack
 mkdir build
+cd build
 cmake ..
 make -j$(nproc)
 eval "cp -p hpack $CacheDir/hpack"
