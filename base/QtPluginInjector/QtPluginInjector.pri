@@ -2,7 +2,8 @@ INCLUDEPATH += $$PWD
 QT += core
 HEADERS += $$PWD/Timer_p.hpp \
            $$PWD/Timer.hpp \
-           $$PWD/QtPluginInjector.hpp
+           $$PWD/QtPluginInjector.hpp \
+           $$PWD/AppImageUpdaterBridgeInterface.hpp 
 
 SOURCES += $$PWD/Timer_p.cc \
            $$PWD/Timer.cc \

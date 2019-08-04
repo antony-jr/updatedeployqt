@@ -9,6 +9,7 @@
 #include <QMetaMethod>
 #include <QPluginLoader>
 #include <QtPluginInjector.hpp>
+#include <AppImageUpdaterBridgeInterface.hpp>
 
 
 /*
@@ -16,7 +17,13 @@
  * This can be directly overwritten when this is in machine code.
 */
 const char PluginToLoadMD5Sum[33] = "8cfaddf5b1a24d1fd31cab97b01f1f87";
-const char SlotToCall[33] = "f80b03178d4080a30c14e71bbbe6e31b";
+const char Bridge[33] = "f80b03178d4080a30c14e71bbbe6e31b";
+
+/*
+ * Bridge[0] == 1 then its AppImageUpdater Bridge.
+ * Bridge[1] == 1 then its Qt Installer Framework Bridge.
+ * Bridge[2] - Bridge[33] yet to be filled.
+*/
 
 static QMetaMethod getMethod(QObject *object, const char *function)
 {
@@ -27,30 +34,31 @@ static QMetaMethod getMethod(QObject *object, const char *function)
 QtPluginInjector::QtPluginInjector(QObject *parent)
 	: QObject(parent)
 {
-	m_Timer.reset(new Timer);
-	m_Timer->setInterval(4000);
-	connect(m_Timer.data() , &Timer::timeout , this , &QtPluginInjector::tryLoadPlugin);
+	m_Timer.setInterval(4000);
+	m_Timer.setSingleShot(true);
+	connect(&m_Timer , &Timer::timeout , this , &QtPluginInjector::tryLoadPlugin);
 }
 
 void QtPluginInjector::init()
 {
-	m_Timer->start();
+	m_Timer.start();
 	return;
 }
 
 void QtPluginInjector::tryLoadPlugin(){
-	m_Timer->stop();
-	if(!QCoreApplication::instance()){
-		m_Timer->start();
+	m_Timer.stop();
+	auto instance = QCoreApplication::instance();
+	if(!instance){
+#ifndef NO_DEBUG
+		qDebug() << "QtPluginInjector:: INFO: no QApplication instance found, retrying.";
+#endif
+		m_Timer.start();
 		return;
 	}	
 
 #ifndef NO_DEBUG
 	qDebug() << "QtPluginInjector:: INFO: trying to load plugin.";
 #endif
-
-	m_Timer.reset(nullptr); /* Delete the timer asap , its costly */	
-	auto instance = QCoreApplication::instance();
 	setParent(instance);
 	
 	/* Search for the plugins in the given plugins directory by
@@ -106,7 +114,19 @@ void QtPluginInjector::tryLoadPlugin(){
 		 *     unloaded when the application closes by QPluginLoader automatically.
 		 *     If you deallocate the plugin then it would result in segmentation 
 		 *     fault. */
-		getMethod(plugin , SlotToCall).invoke(plugin , Qt::QueuedConnection);		
+		if(Bridge[0] == 1){ // AppImage Updater Bridge.
+			AppImageUpdaterBridgeInterface *interface = qobject_cast<AppImageUpdaterBridgeInterface*>(plugin);
+			if(interface){
+#ifndef NO_DEBUG
+			     qDebug() << "QtPluginInjector:: Calling initAppImageUpdaterBridge()";
+#endif
+			     interface->initAppImageUpdaterBridge();
+			}
+		}else if(Bridge[1] == 1){ // QInstaller Bridge.
+#ifndef NO_DEBUG
+			     qDebug() << "QtPluginInjector:: QInstallerBridge is not implemented yet.";
+#endif
+		}
 	}else{
 #ifndef NO_DEBUG
 		qDebug() << "QtPluginInjector:: FATAL: cannot find the reqired plugin.";

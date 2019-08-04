@@ -1,6 +1,5 @@
 #ifndef QT_PLUGIN_INJECTOR_HPP_INCLUDED
 #define QT_PLUGIN_INJECTOR_HPP_INCLUDED
-#include <QScopedPointer>
 #include <Timer.hpp>
 
 class QtPluginInjector : public QObject {
@@ -14,7 +13,7 @@ public Q_SLOTS:
 private Q_SLOTS:
 	void tryLoadPlugin();
 private:
-	QScopedPointer<Timer> m_Timer;
+	Timer m_Timer;
 };
 
 #endif 
