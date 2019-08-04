@@ -12,49 +12,49 @@ jobs:
     - stage: Build Tools 
       os: linux
       env: CACHE_NAME=shared
-      script: "./build-tools.sh /home/travis/dist"
+      script: "sudo bash build-tools.sh /home/travis/dist"
       cache:
          directories:
             - /home/travis/dist/
     - stage: QtPluginInjector for Qt 5.6.0
       os: linux
       env: CACHE_NAME=shared
-      script: "./build-base.sh 5.6.0 /home/travis/dist /home/travis/dist/hpack"
+      script: "sudo bash build-base.sh 5.6.0 /home/travis/dist /home/travis/dist/hpack"
       cache:
          directories:
             - /home/travis/dist/
     - stage: QtPluginInjector for Qt 5.7.0
       os: linux
       env: CACHE_NAME=shared
-      script: "./build-base.sh 5.7.0 /home/travis/dist /home/travis/dist/hpack"
+      script: "sudo bash build-base.sh 5.7.0 /home/travis/dist /home/travis/dist/hpack"
       cache:
          directories:
             - /home/travis/dist/
     - stage: QtPluginInjector for Qt 5.8.0
       os: linux
       env: CACHE_NAME=shared
-      script: "./build-base.sh 5.8.0 /home/travis/dist /home/travis/dist/hpack"
+      script: "sudo bash build-base.sh 5.8.0 /home/travis/dist /home/travis/dist/hpack"
       cache:
          directories:
             - /home/travis/dist/
     - stage: QtPluginInjector for Qt 5.9.0
       os: linux
       env: CACHE_NAME=shared
-      script: "./build-base.sh 5.9.0 /home/travis/dist /home/travis/dist/hpack"
+      script: "sudo bash build-base.sh 5.9.0 /home/travis/dist /home/travis/dist/hpack"
       cache:
          directories:
             - /home/travis/dist/
     - stage: QtPluginInjector for Qt 5.10.0
       os: linux
       env: CACHE_NAME=shared
-      script: "./build-base.sh 5.10.0 /home/travis/dist /home/travis/dist/hpack"
+      script: "sudo bash build-base.sh 5.10.0 /home/travis/dist /home/travis/dist/hpack"
       cache:
          directories:
             - /home/travis/dist/ 
     - stage: Build and Deploy
       os: linux
       env: CACHE_NAME=shared
-      script: "./build-and-deploy.sh /home/travis/dist"
+      script: "bash build-and-deploy.sh /home/travis/dist"
       cache:
          directories:
             - /home/travis/dist/
