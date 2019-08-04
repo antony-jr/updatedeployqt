@@ -33,7 +33,7 @@ static int istrue(char *option){
 }
 
 static int is_string_empty(const char *s){
-	if(s[0] == '\0' || s[0] == '\n'){
+	if(!s || s[0] == '\0' || s[0] == '\n'){
 		return 1;
 	}
 	return 0;
@@ -127,8 +127,8 @@ void config_generator_destroy(config_generator_t *obj){
 	if(obj->qmenu_text){
 		free(obj->qmenu_text);
 	}
-	if(obj->qmenubar){
-		free(obj->qmenubar);
+	if(obj->qmenubar_qobject){
+		free(obj->qmenubar_qobject);
 	}
 	if(obj->qpushbutton_qobject){
 		free(obj->qpushbutton_qobject);
@@ -214,7 +214,7 @@ int config_generator_run(config_generator_t *obj){
 		free(get_string());
 		if(istrue(obj->option)){
 			obj->qmenu_qobject_given = 1;
-			obj->qmenu_text_givne = 1;
+			obj->qmenu_text_given = 1;
 			printf("Please enter the QObject name of the QMenu you want to integrate: ");
 			obj->qmenu_qobject = get_string();
 			printf("Please enter the title of the QMenu you want to integrate: ");

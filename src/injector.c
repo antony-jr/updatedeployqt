@@ -119,10 +119,45 @@ int injector_run(injector_t *obj){
 	}
 	free(p);
 #else
-	write_string_as_file(libqxcb_5_6_0 ,
-			     libqxcb_5_6_0_filesize ,
+     if(qt_version[0] == '5' &&
+        qt_version[2] == '1' &&
+	qt_version[3] != '.'){ /* Qt 5.1y.xx */	
+	r = write_string_as_file(libqxcb_5_10_0 ,
+			     libqxcb_5_10_0_filesize ,
 			     deploy_info_qxcb_plugin_path(obj->bridge->info));
+	}else{
+		switch(qt_version[2]){
+			case '6':
+				r = write_string_as_file(libqxcb_5_6_0 ,
+					   libqxcb_5_6_0_filesize ,
+					   deploy_info_qxcb_plugin_path(obj->bridge->info));
+				break;
+			case '7':
+				r = write_string_as_file(libqxcb_5_7_0 ,
+					   libqxcb_5_7_0_filesize ,
+					   deploy_info_qxcb_plugin_path(obj->bridge->info));
+				break;
+			case '8':
+				r = write_string_as_file(libqxcb_5_8_0 ,
+					   libqxcb_5_8_0_filesize ,
+					   deploy_info_qxcb_plugin_path(obj->bridge->info));
+				break;
+			case '9':
+				r = write_string_as_file(libqxcb_5_9_0 ,
+					   libqxcb_5_9_0_filesize ,
+					   deploy_info_qxcb_plugin_path(obj->bridge->info));
+				break;
+			default:
+				r = -1;
+				break;
+		}
+	}
 
+        if(r < 0){
+		printl(fatal , "cannot write qxcb plugin from memory.");
+		qt_version_info_destroy(qt_ver_info);
+		return r;
+	}	
 #endif
 	qt_version_info_destroy(qt_ver_info);
 
@@ -156,7 +191,7 @@ int injector_run(injector_t *obj){
 	}
 	free(p); /* we don't need this anymore */
 
-	r = find_offset_and_write(fp , slot_to_call_placeholder , slot_to_call , CONFIG_MANAGER_OBJECT_STRING_LEN + 1);
+	r = find_offset_and_write(fp , bridge_placeholder , obj->bridge->bridge , CONFIG_MANAGER_OBJECT_STRING_LEN + 1);
 	if(r <= 0){
 		printl(fatal , "cannot write internal configuration to qxcb plugin");
 		return -1;

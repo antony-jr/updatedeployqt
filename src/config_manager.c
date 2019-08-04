@@ -341,7 +341,7 @@ void config_manager_destroy(config_manager_t *obj){
 		free(obj->bridge_name);
 	}
 	if(obj->qmenu_qobject_name){
-		free(obj->qmenu_name);
+		free(obj->qmenu_qobject_name);
 	}
 	if(obj->qmenu_text){
 		free(obj->qmenu_text);
