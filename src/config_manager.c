@@ -18,6 +18,10 @@ static int isnum(char c){
 
 static int parse_json_object(json_value*,int (*)(const char *,json_value*,config_manager_t*) , config_manager_t *);
 
+static int handle_qmenu(const char *name, json_value *value, config_manager_t *obj){
+
+}
+
 static int handle_manual_update_check_json_object(const char *name , json_value *value , config_manager_t *obj){
 	if(value->type != json_string){
 		printl(fatal , "updatedeployqt.json:%d:%d: expected a string" , value->line , value->col);

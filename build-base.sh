@@ -35,7 +35,7 @@ eval "cp /usr/local/Qt-$QtVersion/plugins/platforms/libqxcb.so /tmp/"
 eval "$HpackBin /tmp/libqxcb.so -o $CacheDir/libqxcb_$QtVersionNoDot.h -g INCLUDED_LIBQXCB_$QtVersionNoDot -v libqxcb_$QtVersionNoDot"
 
 # Build all update bridges if its the lowest possible qt build
-if [ "$QtVersion" == "5.6.0"]
+if [ "$QtVersion" == "5.6.0" ]
 	then
 		# Build AppImageUpdaterBridge
 		cd "base/AppImageUpdaterBridge"
@@ -44,7 +44,4 @@ if [ "$QtVersion" == "5.6.0"]
 		/usr/local/Qt-$QtVersion/bin/qmake "CONFIG+=FULL_BUILD" ..
 		make -j$(nproc)
 		eval "$HpackBin ./libAppImageUpdaterBridge.so -o $CacheDir/aiub.h -g INCLUDED_AIUB_BINARY -v aiub_binary"
-		cd ..
-		rm -rf build
-		cd ../..
 fi

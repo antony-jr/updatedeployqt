@@ -10,11 +10,12 @@
 
 /* placeholders to replace in binary. */
 const char *plugin_to_load_md5sum_placeholder = "8cfaddf5b1a24d1fd31cab97b01f1f87";
-const char *slot_to_call_placeholder = "f80b03178d4080a30c14e71bbbe6e31b";
+const char *bridge_placeholder = "f80b03178d4080a30c14e71bbbe6e31b";
 
 
 /* internal configuration */
 const char *slot_to_call = "initAutoUpdate(void)";
+
 
 
 static char *get_qxcb_source(const char *qtversion){
