@@ -34,7 +34,7 @@ rm -rf build
 # Now lets build an AppImage just as an option
 mkdir build
 cd build
-cmake -DGIT_COMMIT_STR="$GitCommit" ..
+cmake -DCMAKE_INSTALL_PREFIX=/usr -DGIT_COMMIT_STR="$GitCommit" ..
 make -j$(nproc)
 make install DESTDIR=../appdir
 cd ..
@@ -53,7 +53,6 @@ chmod +x linuxdeploy-x86_64.AppImage
 export VERSION="continuous"
 ./linuxdeploy-x86_64.AppImage --appdir appdir --output appimage
 
-
 # Deploy to Github releases
 wget https://raw.githubusercontent.com/probonopd/uploadtool/master/upload.sh
-bash upload.sh "./updatedeployqt-continuous-x86_64.bin" "updatedeployqt-continuous-x86_64.AppImage" "*zsync"
+bash upload.sh updatedeployqt*.bin updatedeployqt*.AppImage *zsync
