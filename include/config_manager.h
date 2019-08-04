@@ -62,6 +62,7 @@ config_manager_t *config_manager_create(const char *);
 void config_manager_destroy(config_manager_t*);
 
 int config_manager_run(config_manager_t*);
+int config_manager_run_guesstimate(config_manager_t*,const char*);
 
 /* gives a boolean string that has a series of boolean values 
  * for specific options supported by updatedeployqt.

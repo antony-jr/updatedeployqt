@@ -86,10 +86,20 @@ int main(int argc, char **argv) {
 
 	/* run the configuration manager to parse the json file and store 
 	 * required information. */
-	if(config_manager_run(cmanager) < 0){
-		/* if parsing fails then cleanup and exit with errors */
-		r = -1;
-		goto cleanup;
+	if(!args_parser_get_bridge_to_assume_config(ap)){
+		if(config_manager_run(cmanager) < 0){
+			/* if parsing fails then cleanup and exit with errors */
+			r = -1;
+			goto cleanup;
+		}
+	}else{
+		if(config_manager_run_guesstimate(cmanager ,
+					          args_parser_get_bridge_to_assume_config(ap)) < 0){
+
+			/* Some error with guessing. */
+			r = -1;
+			goto cleanup;
+		}
 	}
 
 	/* Now lets get the deploy information before we download anything. */
@@ -233,4 +243,5 @@ static void print_help(char *program_name){
     printf("    -g,--generate-config  create configuration file interactively.\n");
     printf("    -q,--quiet            do not print anything to stdout.\n");
     printf("    -v,--version          show version and exit.\n");
+    printf("    -a,--assume-config    guess the configuration for the given bridge.\n");
 }

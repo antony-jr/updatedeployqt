@@ -305,14 +305,6 @@ config_manager_t *config_manager_create(const char *config){
 		return NULL;
 	}
 
-	if(access(config , F_OK)){
-		printl(fatal , "cannot find %s" , config);
-		return NULL;
-	}
-	if(access(config , R_OK )){
-		printl(fatal , "you do not have permission to read %s" , config);
-		return NULL;
-	}
 	obj->config_file = calloc(1 , (sizeof(*(obj->config_file)) * strlen(config)) + 1);
 	if(!obj->config_file){
 		printl(fatal , "not enough memory");
@@ -372,7 +364,15 @@ int config_manager_run(config_manager_t *obj){
 		return -1;
 	}
 
-
+	if(access(obj->config_file , F_OK)){
+		printl(fatal , "cannot find %s" , obj->config_file);
+		return -1;
+	}
+	if(access(obj->config_file , R_OK )){
+		printl(fatal , "you do not have permission to read %s" , obj->config_file);
+		return -1;
+	}
+	
 	if(!(fp = fopen(obj->config_file , "r"))){
 		printl(fatal , "cannot open %s" , obj->config_file);
 		return -1;
@@ -405,6 +405,45 @@ int config_manager_run(config_manager_t *obj){
 		return -1;
 	}
 	free(contents);
+	return 0;
+}
+
+int config_manager_run_guesstimate(config_manager_t *obj, const char *bridge){
+	printl(info , "guessing all configuration");
+
+	if(!strcmp(bridge , "AppImageUpdaterBridge")){
+		printl(info , "guessing configuration for AppImage Updater Bridge");
+	}else{
+		printl(info , "Only AppImage Updater Bridge is supported for now");
+		return -1;
+	}
+
+	/* This is the configuration for guessing AppImage Updater Bridge settings. */
+
+	/* Set this as manual update check. */
+	obj->booleans[CONFIG_MANAGER_MANUAL_UPDATE_CHECK] = true;
+	printl(info , "configuration manager guess: will be using manual update check");
+
+	/* Most probably the QMenu with QObject name 'menuHelp' will have the update check. */
+	obj->qmenu_qobject_name = calloc(10 , sizeof(*(obj->qmenu_qobject_name)));
+	strcpy(obj->qmenu_qobject_name , "menuHelp");
+	printl(info , "configuration manager guess: will be using QMenu QObject name 'menuHelp'");
+	obj->booleans[CONFIG_MANAGER_QMENU_QOBJECT_NAME_GIVEN] = true;
+
+	/* Or most probably the QMenu with title 'Help' will have the update check. */
+	obj->qmenu_text = calloc(5 , sizeof(*(obj->qmenu_text)));
+	strcpy(obj->qmenu_text , "elp"); /* We don't want 'H' since in some software it will be with underscores.*/
+	printl(info , "configuration manager guess: will be integrating into any QMenu with 'elp' subsring as title");
+	obj->booleans[CONFIG_MANAGER_QMENU_TEXT_GIVEN] = true;
+
+	/* Lets also look for a QMenuBar with 'menuBar' as the QObject name. */
+	obj->qmenubar_qobject_name = calloc(10 , sizeof(*(obj->qmenubar_qobject_name)));
+	strcpy(obj->qmenubar_qobject_name , "menuBar");
+	printl(info , "configuration manager guess: will be integrating a new QMenu in QMenuBar with 'menuBar' as QObject name");
+	obj->booleans[CONFIG_MANAGER_QMENUBAR_QOBJECT_NAME_GIVEN] = true;
+
+	/* ------- */
+	
 	return 0;
 }
 

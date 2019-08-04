@@ -13,6 +13,7 @@ typedef struct {
 	char **args;
 	char *config;
 	char *deploy_dir;
+	char *assume_config_bridge;
 	void (*header)();
 	void (*help)(const char*);
 } args_parser_t;
@@ -23,6 +24,7 @@ void args_parser_destroy(args_parser_t*);
 int args_parser_run(args_parser_t*);
 const char *args_parser_get_config_file_path(args_parser_t*);
 const char *args_parser_get_deploy_dir_path(args_parser_t*);
+const char *args_parser_get_bridge_to_assume_config(args_parser_t*);
 short args_parser_is_generate_config(args_parser_t*);
 short args_parser_is_quiet(args_parser_t*);
 

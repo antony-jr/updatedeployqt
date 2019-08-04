@@ -39,6 +39,9 @@ void args_parser_destroy(args_parser_t *obj){
 	if(obj->deploy_dir){
 		free(obj->deploy_dir);
 	}
+	if(obj->assume_config_bridge){
+		free(obj->assume_config_bridge);
+	}
 	free(obj);
 	return;
 }
@@ -117,6 +120,49 @@ int args_parser_run(args_parser_t *obj){
 				     strlen(config_file)) + 1);
 	    strcpy(obj->config , config_file);
 	    continue; 
+       }
+       else if(strstr(*argv, "-a") ||
+                  strstr(*argv, "--assume-config")) {
+	    if(obj->assume_config_bridge){
+		    printl(fatal , "cannot assume configuration for two bridges at the same time");
+		    return ARGS_PARSER_FATAL_ERROR;
+	    }
+            if((*argv)[0] == '-' && (*argv)[1] == 'a'){
+		if((*argv)[2] == '\0'){ /* The next arg has the string.*/
+			if(*(++argv)){
+				obj->assume_config_bridge = calloc(1 , 
+						    (sizeof(*(obj->assume_config_bridge))
+						    * strlen(*argv)) + 1);
+				strcpy(obj->assume_config_bridge , *argv);
+				continue;
+			}
+			printl(fatal , "expected the configuration file");
+			return ARGS_PARSER_FATAL_ERROR;
+		}
+      		char *bridge = *argv + 2; /* go past -a */
+		obj->assume_config_bridge = calloc(1 , (sizeof(*(obj->assume_config_bridge)) * 
+				     strlen(bridge)) + 1);
+		strcpy(obj->assume_config_bridge, bridge);
+		continue;
+            }
+	    char *bridge = *argv + 15; /* move past --assume-config*/
+	    if(!(*bridge)){
+		    /* next arg has the config file. */
+	   	    if(*(++argv)){
+			obj->assume_config_bridge = calloc(1 , 
+						(sizeof(*(obj->assume_config_bridge))
+						    * strlen(*argv)) + 1);
+				strcpy(obj->assume_config_bridge , *argv);
+				continue;
+			}
+			printl(fatal , "expected the bridge name");
+			return ARGS_PARSER_FATAL_ERROR;
+
+	    }
+	    obj->assume_config_bridge = calloc(1 , (sizeof(*(obj->assume_config_bridge)) * 
+				     strlen(bridge)) + 1);
+	    strcpy(obj->assume_config_bridge , bridge);
+	    continue; 
        }else {
 	    /* If its not an option then lets take it as the
 	     * deploy directory. 
@@ -152,6 +198,13 @@ const char *args_parser_get_deploy_dir_path(args_parser_t *obj){
 		return NULL;
 	}
 	return obj->deploy_dir;
+}
+
+const char *args_parser_get_bridge_to_assume_config(args_parser_t *obj){
+	if(!obj || !obj->assume_config_bridge){
+		return NULL;
+	}
+	return obj->assume_config_bridge;
 }
 
 short args_parser_is_generate_config(args_parser_t *obj){
