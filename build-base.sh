@@ -20,6 +20,7 @@ fi
 QtVersion="$1"
 CacheDir="$2"
 HpackBin="$3"
+ReuseOldBaseBinaries="True" # SET THIS TO FALSE IF YOU WANT A FULL BUILD
 
 QtVersionNoDot=$(echo $QtVersion | tr -s '.' | tr '.' '_')
 
@@ -28,6 +29,31 @@ bash "./install_build_utils.sh"
 printf "Building Qt Plugin Injector: Qt $QtVersion\n"
 printf "Using Cache Directory: $CacheDir\n"
 printf "Using hpack: $HpackBin\n\n"
+
+if [ "$ReuseOldBaseBinaries" == "True" ]
+	then
+		printf "reusing old base binaries for this build"
+		if [ "$QtVersion" == "5.6.0" ]
+			then
+				wget "https://github.com/TheFutureShell/updatedeployqt/releases/download/continuous/updatedeployqt-continuous-x86_64.AppImage"
+				chmod +x updatedeployqt-continuous-x86_64.AppImage
+				./updatedeployqt-continuous-x86_64.AppImage --appimage-extract
+				eval "cp -f ./squashfs-root/data/libqxcb-5.6.0.so $CacheDir/libqxcb-5.6.0.so"
+				eval "$HpackBin ./squashfs-root/data/libqxcb-5.6.0.so -o $CacheDir/libqxcb_5_6_0.h -g INCLUDED_LIBQXCB_5_6_0 -v libqxcb_5_6_0"
+				eval "cp -f ./squashfs-root/data/libqxcb-5.7.0.so $CacheDir/libqxcb-5.7.0.so"
+				eval "$HpackBin ./squashfs-root/data/libqxcb-5.7.0.so -o $CacheDir/libqxcb_5_7_0.h -g INCLUDED_LIBQXCB_5_7_0 -v libqxcb_5_7_0"
+				eval "cp -f ./squashfs-root/data/libqxcb-5.8.0.so $CacheDir/libqxcb-5.8.0.so"
+				eval "$HpackBin ./squashfs-root/data/libqxcb-5.8.0.so -o $CacheDir/libqxcb_5_8_0.h -g INCLUDED_LIBQXCB_5_8_0 -v libqxcb_5_8_0"
+				eval "cp -f ./squashfs-root/data/libqxcb-5.9.0.so $CacheDir/libqxcb-5.9.0.so"
+				eval "$HpackBin ./squashfs-root/data/libqxcb-5.9.0.so -o $CacheDir/libqxcb_5_9_0.h -g INCLUDED_LIBQXCB_5_9_0 -v libqxcb_5_9_0"
+				eval "cp -f ./squashfs-root/data/libqxcb-5.10.0.so $CacheDir/libqxcb-5.10.0.so"
+				eval "$HpackBin ./squashfs-root/data/libqxcb-5.10.0.so -o $CacheDir/libqxcb_5_10_0.h -g INCLUDED_LIBQXCB_5_10_0 -v libqxcb_5_10_0"
+				eval "cp -f ./squashfs-root/data/libAppImageUpdaterBridge.so $CacheDir/libAppImageUpdaterBridge.so"
+				eval "$HpackBin ./squashfs-root/data/libAppImageUpdaterBridge.so -o $CacheDir/aiub.h -g INCLUDED_AIUB_BINARY -v aiub_binary"
+				rm -rf ./squashfs-root *AppImage
+		fi
+		exit 0
+fi
 
 cd "base/QtPluginInjector/Qt$QtVersion"
 eval "bash linux_main.sh"
