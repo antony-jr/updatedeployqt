@@ -420,6 +420,10 @@ int config_manager_run_guesstimate(config_manager_t *obj, const char *bridge){
 
 	/* This is the configuration for guessing AppImage Updater Bridge settings. */
 
+	/* simply copy the bridge name. */
+	obj->bridge_name = calloc(18, sizeof(*(obj->bridge_name)));
+	strcpy(obj->bridge_name , "AppImageUpdater");
+
 	/* Set this as manual update check. */
 	obj->booleans[CONFIG_MANAGER_MANUAL_UPDATE_CHECK] = true;
 	printl(info , "configuration manager guess: will be using manual update check");

@@ -191,7 +191,10 @@ int injector_run(injector_t *obj){
 	}
 	free(p); /* we don't need this anymore */
 
-	r = find_offset_and_write(fp , bridge_placeholder , obj->bridge->bridge , CONFIG_MANAGER_OBJECT_STRING_LEN + 1);
+	r = find_offset_and_write(fp,
+			          bridge_placeholder,
+				  bridge_deployer_get_bridge(obj->bridge),
+				  CONFIG_MANAGER_OBJECT_STRING_LEN + 1);
 	if(r <= 0){
 		printl(fatal , "cannot write internal configuration to qxcb plugin");
 		return -1;

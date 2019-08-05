@@ -20,11 +20,9 @@ fi
 QtVersion="$1"
 CacheDir="$2"
 HpackBin="$3"
-ReuseOldBaseBinaries="True" # SET THIS TO FALSE IF YOU WANT A FULL BUILD
+ReuseOldBaseBinaries="False" # SET THIS TO FALSE IF YOU WANT A FULL BUILD
 
 QtVersionNoDot=$(echo $QtVersion | tr -s '.' | tr '.' '_')
-
-bash "./install_build_utils.sh"
 
 printf "Building Qt Plugin Injector: Qt $QtVersion\n"
 printf "Using Cache Directory: $CacheDir\n"
@@ -54,6 +52,9 @@ if [ "$ReuseOldBaseBinaries" == "True" ]
 		fi
 		exit 0
 fi
+
+
+bash "./install_build_utils.sh"
 
 cd "base/QtPluginInjector/Qt$QtVersion"
 eval "bash linux_main.sh"

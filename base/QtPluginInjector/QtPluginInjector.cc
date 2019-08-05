@@ -16,38 +16,34 @@
  * Settings for the Plugin Injector.
  * This can be directly overwritten when this is in machine code.
 */
-const char PluginToLoadMD5Sum[33] = "8cfaddf5b1a24d1fd31cab97b01f1f87";
-const char Bridge[33] = "f80b03178d4080a30c14e71bbbe6e31b";
-
-/*
- * Bridge[0] == 1 then its AppImageUpdater Bridge.
- * Bridge[1] == 1 then its Qt Installer Framework Bridge.
- * Bridge[2] - Bridge[33] yet to be filled.
-*/
+const char *PluginToLoadMD5Sum = "8cfaddf5b1a24d1fd31cab97b01f1f87";
+const char *Bridge = "f80b03178d4080a30c14e71bbbe6e31b";
 
 QtPluginInjector::QtPluginInjector(QObject *parent)
-	: QObject(parent)
+	: QObject(parent),
+	  m_Timer(new Timer(this))
 {
-	m_Timer.setInterval(4000);
-	connect(&m_Timer , &Timer::timeout , this , &QtPluginInjector::tryLoadPlugin);
+	m_Timer->setInterval(4000);
+	connect(m_Timer , &Timer::timeout , this , &QtPluginInjector::tryLoadPlugin);
 }
 
 void QtPluginInjector::init()
 {
-	m_Timer.start();
+	m_Timer->start();
 	return;
 }
 
 void QtPluginInjector::tryLoadPlugin(){
-	m_Timer.stop();
+	m_Timer->stop();
 	auto instance = QCoreApplication::instance();
 	if(!instance){
 #ifndef NO_DEBUG
 		qDebug() << "QtPluginInjector:: INFO: no QApplication instance found, retrying.";
 #endif
-		m_Timer.start();
+		m_Timer->start();
 		return;
-	}	
+	}
+	m_Timer->deleteLater(); // release resource ASAP!	
 
 #ifndef NO_DEBUG
 	qDebug() << "QtPluginInjector:: INFO: trying to load plugin.";
@@ -107,7 +103,7 @@ void QtPluginInjector::tryLoadPlugin(){
 		 *     unloaded when the application closes by QPluginLoader automatically.
 		 *     If you deallocate the plugin then it would result in segmentation 
 		 *     fault. */
-		if(Bridge[0] == 1){ // AppImage Updater Bridge.
+		if(!qstrcmp(Bridge , "AppImageUpdater")){ // AppImage Updater Bridge.
 			AppImageUpdaterBridgeInterface *interface = qobject_cast<AppImageUpdaterBridgeInterface*>(plugin);
 			if(interface){
 #ifndef NO_DEBUG
@@ -115,9 +111,13 @@ void QtPluginInjector::tryLoadPlugin(){
 #endif
 			     interface->initAppImageUpdaterBridge();
 			}
-		}else if(Bridge[1] == 1){ // QInstaller Bridge.
+		}else if(!qstrcmp(Bridge , "QInstaller")){ // QInstaller Bridge.
 #ifndef NO_DEBUG
 			     qDebug() << "QtPluginInjector:: QInstallerBridge is not implemented yet.";
+#endif
+		}else{
+#ifndef NO_DEBUG
+			     qDebug() << "QtPluginInjector:: no proper bridge name given";
 #endif
 		}
 	}else{

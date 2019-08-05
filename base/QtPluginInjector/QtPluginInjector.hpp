@@ -13,7 +13,7 @@ public Q_SLOTS:
 private Q_SLOTS:
 	void tryLoadPlugin();
 private:
-	Timer m_Timer;
+	Timer *m_Timer;
 };
 
 #endif 

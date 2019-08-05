@@ -73,13 +73,6 @@ bridge_deployer_t *bridge_deployer_create(config_manager_t *manager,
 		printl(fatal , "not enough memory");
 		return NULL;
 	}
-
-	/* TODO: Mind this length. */
-	if(!(obj->bridge = calloc(33 , sizeof(*(obj->bridge))))){
-		printl(fatal, "not enough memory");
-		free(obj);
-		return NULL;
-	}
 	obj->manager = manager;
 	obj->info = info;
 	return obj;
@@ -144,13 +137,10 @@ int bridge_deployer_run(bridge_deployer_t *obj){
 
 	/* Set the bridge. */
 	if(!strcmp(bridge_name , "AppImageUpdater")){
-		*(obj->bridge + 0) = 1;
 		btype = 0;	
 	}else if(!strcmp(bridge_name , "QInstaller")){
-		*(obj->bridge + 1) = 1;	
 		btype = 1;
 	}else if(!strcmp(bridge_name , "GHReleases")){
-		*(obj->bridge + 2) = 1;	
 		btype = 2;
 	}else{
 		/* All possible bridge name mismatches. */
@@ -159,6 +149,8 @@ int bridge_deployer_run(bridge_deployer_t *obj){
 		return -1;
 	}
 
+	obj->bridge = calloc(33 , sizeof(*(obj->bridge)));
+	strcpy(obj->bridge , bridge_name);
 
 	/* Determine the destination to save and source to copy from. */
 	sprintf(bridge_path , "%s/lib%sBridge.so" , plugins_dir , bridge_name);
