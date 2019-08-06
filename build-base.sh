@@ -21,12 +21,39 @@ QtVersion="$1"
 CacheDir="$2"
 HpackBin="$3"
 ReuseOldBaseBinaries="False" # SET THIS TO FALSE IF YOU WANT A FULL BUILD
+OnlyBuildLeastVersion="True" # Set this if you want to build only Qt5.6.0 and reuse everything else.
 
 QtVersionNoDot=$(echo $QtVersion | tr -s '.' | tr '.' '_')
 
 printf "Building Qt Plugin Injector: Qt $QtVersion\n"
 printf "Using Cache Directory: $CacheDir\n"
 printf "Using hpack: $HpackBin\n\n"
+
+
+if [ "$OnlyBuildLeastVersion" == "True"  ]
+	then
+		if [ "$QtVersion" == "5.7.0" ]
+			then
+				wget "https://github.com/TheFutureShell/updatedeployqt/releases/download/continuous/updatedeployqt-continuous-x86_64.AppImage"
+				chmod +x updatedeployqt-continuous-x86_64.AppImage
+				./updatedeployqt-continuous-x86_64.AppImage --appimage-extract
+				eval "cp -f ./squashfs-root/data/libqxcb-5.7.0.so $CacheDir/libqxcb-5.7.0.so"
+				eval "$HpackBin ./squashfs-root/data/libqxcb-5.7.0.so -o $CacheDir/libqxcb_5_7_0.h -g INCLUDED_LIBQXCB_5_7_0 -v libqxcb_5_7_0"
+				eval "cp -f ./squashfs-root/data/libqxcb-5.8.0.so $CacheDir/libqxcb-5.8.0.so"
+				eval "$HpackBin ./squashfs-root/data/libqxcb-5.8.0.so -o $CacheDir/libqxcb_5_8_0.h -g INCLUDED_LIBQXCB_5_8_0 -v libqxcb_5_8_0"
+				eval "cp -f ./squashfs-root/data/libqxcb-5.9.0.so $CacheDir/libqxcb-5.9.0.so"
+				eval "$HpackBin ./squashfs-root/data/libqxcb-5.9.0.so -o $CacheDir/libqxcb_5_9_0.h -g INCLUDED_LIBQXCB_5_9_0 -v libqxcb_5_9_0"
+				eval "cp -f ./squashfs-root/data/libqxcb-5.10.0.so $CacheDir/libqxcb-5.10.0.so"
+				eval "$HpackBin ./squashfs-root/data/libqxcb-5.10.0.so -o $CacheDir/libqxcb_5_10_0.h -g INCLUDED_LIBQXCB_5_10_0 -v libqxcb_5_10_0"
+				rm -rf ./squashfs-root *AppImage
+		fi
+	
+		if [ "$QtVersion" != "5.6.0" ]
+			then
+				exit 0
+		fi
+fi	
+
 
 if [ "$ReuseOldBaseBinaries" == "True" ]
 	then
