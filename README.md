@@ -1,10 +1,16 @@
-# Update Deploy Qt ![issues](https://img.shields.io/github/issues/TheFutureShell/updatedeployqt.svg?style=flat-square) ![forks](https://img.shields.io/github/forks/TheFutureShell/updatedeployqt.svg?style=flat-square) ![stars](https://img.shields.io/github/stars/TheFutureShell/updatedeployqt.svg?style=flat-square) ![license](https://img.shields.io/github/license/TheFutureShell/updatedeployqt.svg?style=flat-square)
+# Update Deploy Qt ![issues](https://img.shields.io/github/issues/antony-jr/updatedeployqt.svg?style=flat-square) ![forks](https://img.shields.io/github/forks/TheFutureShell/updatedeployqt.svg?style=flat-square) ![stars](https://img.shields.io/github/stars/TheFutureShell/updatedeployqt.svg?style=flat-square) ![license](https://img.shields.io/github/license/TheFutureShell/updatedeployqt.svg?style=flat-square)
 
 
 
 <p align=center>
-<img src="https://raw.githubusercontent.com/TheFutureShell/artwork/master/updatedeployqt/release.png" width="300px" height=auto />
+<img src=".github/logo.png" width="300px" height=auto />
 </p>
+
+
+
+> Before thinking about using this please remember that this software is still in pre-alpha stage and 
+> everything this does is very experimental and unstable which may even crash your application at 
+> times. This project may even be **deleted** without any notice. -- Antony Jr.
 
 
 **updatedeployqt** is a command line tool which can **deploy** auto update feature or *integrate the updater into
@@ -14,7 +20,6 @@ build the **Application** , *as long as it uses Qt framework , this feature can 
 
 
 **IMPORTANT**: *This software is in alpha stage.* **Remember with great power comes great responsibility.**
-
 
 
 # Features
@@ -42,7 +47,7 @@ You don't need to compile this from source , simply download the latest AppImage
 executable and you are ready to go. This works in travis-ci and other such services too. So you can deploy
 update directly on continuous integration services.
 
-You can download the latest AppImage from this [url](https://github.com/TheFutureShell/updatedeployqt/releases/download/continuous/updatedeployqt-continuous-x86_64.AppImage). This *url* will be constant and will never change and thus
+You can download the latest AppImage from this [url](https://github.com/antony-jr/updatedeployqt/releases/download/continuous/updatedeployqt-continuous-x86_64.AppImage). This *url* will be constant and will never change and thus
 you can use this *url* to download the AppImage using wget whenever you want to use it.
 
 ```
@@ -103,8 +108,7 @@ auto update feature for their Qt application.
 
 BSD 3-Clause License
 
-Copyright (c) 2019, Future Shell Laboratory.   
-All Rights Reserved.
+Copyright (c) 2019, Antony Jr.   
 
 
 
