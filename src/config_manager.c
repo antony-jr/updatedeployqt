@@ -93,11 +93,6 @@ static int handle_qmenu(const char *name, json_value *value, config_manager_t *o
 }
 
 static int handle_manual_update_check_json_object(const char *name , json_value *value , config_manager_t *obj){
-	if(value->type != json_string){
-		printl(fatal , "updatedeployqt.json:%d:%d: expected a string" , value->line , value->col);
-		return -1;
-	}
-
 	if(!strcmp(name , "qmenu")){
 		if(value->type != json_object){
 			printl(fatal , "updatedeployqt.json:%d:%d: expected a json object" , value->line , value->col);
@@ -120,6 +115,10 @@ static int handle_manual_update_check_json_object(const char *name , json_value 
 		return parse_json_object(value , handle_qaction_to_override , obj);	
 	}
 	else if(!strcmp(name , "qmenubar-name")){
+		if(value->type != json_string){
+		printl(fatal , "updatedeployqt.json:%d:%d: expected a string" , value->line , value->col);
+		return -1;
+		}
 		printl(info , "QMenuBar QObject name(%s) is given, 'Check for Update' QMenu object will be created" , 
 			value->u.string.ptr);
 		obj->booleans[CONFIG_MANAGER_QMENUBAR_QOBJECT_NAME_GIVEN] = true;
